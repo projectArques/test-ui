@@ -182,7 +182,7 @@ KeyHintKey.FontFace = Font.new("rbxasset://fonts/families/Inconsolata.json", Enu
 KeyHintKey.TextColor3 = Color3.fromRGB(204, 183, 148)
 KeyHintKey.BackgroundTransparency = 1
 KeyHintKey.Size = UDim2.new(1, 0, 1, 0)
-KeyHintKey.Text = "RAlt"
+KeyHintKey.Text = "RightAlt"
 KeyHintKey.Name = "Key"
 KeyHintKey.Parent = KeyHintCap
 
@@ -220,118 +220,7 @@ Chevron.ImageRectOffset = Vector2.new(564, 284)
 Chevron.Position = UDim2.new(0.5, 0, 1, -20)
 Chevron.Parent = ScreenGui
 
-local function CreateTabButton(name, icon, tabData)
-    local frame = Instance.new("Frame")
-    frame.ZIndex = 150
-    frame.BorderSizePixel = 0
-    frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    frame.AnchorPoint = Vector2.new(0, 0.5)
-    frame.Size = UDim2.new(0, 44, 0, 36)
-    frame.Position = UDim2.new(0, 96 + (#TabButtons * 54), 0.5, 0)
-    frame.Name = "tab_" .. name
-    frame.BackgroundTransparency = 1
-    frame.Parent = TabsFrame
-    frame.TabData = tabData
-    
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 15)
-    corner.Parent = frame
-    
-    local stroke = Instance.new("UIStroke")
-    stroke.Transparency = 1
-    stroke.Thickness = 1.2
-    stroke.Color = Color3.fromRGB(255, 255, 255)
-    stroke.Parent = frame
-    
-    local strokeGrad = Instance.new("UIGradient")
-    strokeGrad.Rotation = 90
-    strokeGrad.Parent = stroke
-    
-    local grad = Instance.new("UIGradient")
-    grad.Rotation = 90
-    grad.Parent = frame
-    
-    local acrylic1 = Instance.new("ImageLabel")
-    acrylic1.ZIndex = 151
-    acrylic1.BorderSizePixel = 0
-    acrylic1.ScaleType = Enum.ScaleType.Tile
-    acrylic1.ImageTransparency = 1
-    acrylic1.Image = "rbxassetid://9968344105"
-    acrylic1.TileSize = UDim2.new(0, 128, 0, 128)
-    acrylic1.Size = UDim2.new(1, 0, 1, 0)
-    acrylic1.BackgroundTransparency = 1
-    acrylic1.Name = "acrylicthing"
-    acrylic1.Parent = frame
-    
-    local acorner1 = Instance.new("UICorner")
-    acorner1.CornerRadius = UDim.new(0, 12)
-    acorner1.Parent = acrylic1
-    
-    local acrylic2 = Instance.new("ImageLabel")
-    acrylic2.ZIndex = 151
-    acrylic2.BorderSizePixel = 0
-    acrylic2.ScaleType = Enum.ScaleType.Tile
-    acrylic2.ImageTransparency = 1
-    acrylic2.Image = "rbxassetid://9968344227"
-    acrylic2.TileSize = UDim2.new(0, 128, 0, 128)
-    acrylic2.Size = UDim2.new(1, 0, 1, 0)
-    acrylic2.BackgroundTransparency = 1
-    acrylic2.Name = "acrylicthing"
-    acrylic2.Parent = frame
-    
-    local acorner2 = Instance.new("UICorner")
-    acorner2.CornerRadius = UDim.new(0, 12)
-    acorner2.Parent = acrylic2
-    
-    local icon = Instance.new("ImageButton")
-    icon.AutoButtonColor = false
-    icon.BackgroundTransparency = 1
-    icon.ImageColor3 = Color3.fromRGB(241, 241, 241)
-    icon.ZIndex = 151
-    icon.AnchorPoint = Vector2.new(0.5, 0.5)
-    icon.Image = icon or "rbxassetid://0"
-    icon.Size = UDim2.new(0, 22, 0, 22)
-    icon.Name = "Icon"
-    icon.Position = UDim2.new(0.5, 0, 0.5, 0)
-    icon.Parent = frame
-    
-    local label = Instance.new("TextLabel")
-    label.TextTruncate = Enum.TextTruncate.AtEnd
-    label.ZIndex = 151
-    label.TextSize = 14
-    label.TextTransparency = 1
-    label.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-    label.TextColor3 = Color3.fromRGB(241, 241, 241)
-    label.BackgroundTransparency = 1
-    label.AnchorPoint = Vector2.new(0.5, 0.5)
-    label.Size = UDim2.new(0, 74, 0, 19)
-    label.Text = name
-    label.Name = "Label"
-    label.Position = UDim2.new(0.5, 0, 0.5, 0)
-    label.Parent = frame
-    
-    local interact = Instance.new("TextButton")
-    interact.TextTransparency = 1
-    interact.AutoButtonColor = false
-    interact.ZIndex = 155
-    interact.AnchorPoint = Vector2.new(0.5, 0.5)
-    interact.BackgroundTransparency = 1
-    interact.Size = UDim2.new(1, 0, 1, 0)
-    interact.Text = ""
-    interact.Name = "Interact"
-    interact.Position = UDim2.new(0.5, 0, 0.5, 0)
-    interact.Parent = frame
-    
-    table.insert(TabButtons, frame)
-    
-    interact.MouseButton1Click:Connect(function()
-        Sable:SwitchTab(tabData)
-    end)
-    
-    return frame
-end
-
-function Sable:SwitchTab(tabData)
+local function SwitchTab(tabData)
     for _, child in pairs(PanelContent:GetChildren()) do
         if child:IsA("Frame") and child ~= ContentLayout and child ~= ContentPadding then
             child:Destroy()
@@ -356,12 +245,12 @@ function Sable:CreateWindow(config)
         Brand.Text = config.Name
     end
     
-    local keybind = config.Keybind or "RAlt"
+    local keybind = config.Keybind or "RightAlt"
     if type(keybind) == "string" then
         keybind = Enum.KeyCode[keybind] or Enum.KeyCode.RightAlt
     end
     
-    KeyHintKey.Text = keybind.Name or "RAlt"
+    KeyHintKey.Text = keybind.Name or "RightAlt"
     
     UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if gameProcessed then return end
@@ -383,19 +272,126 @@ function Sable:CreateWindow(config)
     end)
     
     local Window = {}
+    local TabIndex = 0
     
     function Window:CreateTab(name, icon)
+        TabIndex = TabIndex + 1
         local tabData = {
             Name = name,
             Icon = icon or "rbxassetid://0",
-            Elements = {}
+            Elements = {},
+            Index = TabIndex
         }
         
-        CreateTabButton(name, icon, tabData)
+        local frame = Instance.new("Frame")
+        frame.ZIndex = 150
+        frame.BorderSizePixel = 0
+        frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        frame.AnchorPoint = Vector2.new(0, 0.5)
+        frame.Size = UDim2.new(0, 44, 0, 36)
+        frame.Position = UDim2.new(0, 96 + ((#TabsData) * 54), 0.5, 0)
+        frame.Name = "tab_" .. name
+        frame.BackgroundTransparency = 1
+        frame.Parent = TabsFrame
+        
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 15)
+        corner.Parent = frame
+        
+        local stroke = Instance.new("UIStroke")
+        stroke.Transparency = 1
+        stroke.Thickness = 1.2
+        stroke.Color = Color3.fromRGB(255, 255, 255)
+        stroke.Parent = frame
+        
+        local strokeGrad = Instance.new("UIGradient")
+        strokeGrad.Rotation = 90
+        strokeGrad.Parent = stroke
+        
+        local grad = Instance.new("UIGradient")
+        grad.Rotation = 90
+        grad.Parent = frame
+        
+        local acrylic1 = Instance.new("ImageLabel")
+        acrylic1.ZIndex = 151
+        acrylic1.BorderSizePixel = 0
+        acrylic1.ScaleType = Enum.ScaleType.Tile
+        acrylic1.ImageTransparency = 1
+        acrylic1.Image = "rbxassetid://9968344105"
+        acrylic1.TileSize = UDim2.new(0, 128, 0, 128)
+        acrylic1.Size = UDim2.new(1, 0, 1, 0)
+        acrylic1.BackgroundTransparency = 1
+        acrylic1.Name = "acrylicthing"
+        acrylic1.Parent = frame
+        
+        local acorner1 = Instance.new("UICorner")
+        acorner1.CornerRadius = UDim.new(0, 12)
+        acorner1.Parent = acrylic1
+        
+        local acrylic2 = Instance.new("ImageLabel")
+        acrylic2.ZIndex = 151
+        acrylic2.BorderSizePixel = 0
+        acrylic2.ScaleType = Enum.ScaleType.Tile
+        acrylic2.ImageTransparency = 1
+        acrylic2.Image = "rbxassetid://9968344227"
+        acrylic2.TileSize = UDim2.new(0, 128, 0, 128)
+        acrylic2.Size = UDim2.new(1, 0, 1, 0)
+        acrylic2.BackgroundTransparency = 1
+        acrylic2.Name = "acrylicthing"
+        acrylic2.Parent = frame
+        
+        local acorner2 = Instance.new("UICorner")
+        acorner2.CornerRadius = UDim.new(0, 12)
+        acorner2.Parent = acrylic2
+        
+        local iconLabel = Instance.new("ImageButton")
+        iconLabel.AutoButtonColor = false
+        iconLabel.BackgroundTransparency = 1
+        iconLabel.ImageColor3 = Color3.fromRGB(241, 241, 241)
+        iconLabel.ZIndex = 151
+        iconLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+        iconLabel.Image = icon
+        iconLabel.Size = UDim2.new(0, 22, 0, 22)
+        iconLabel.Name = "Icon"
+        iconLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
+        iconLabel.Parent = frame
+        
+        local label = Instance.new("TextLabel")
+        label.TextTruncate = Enum.TextTruncate.AtEnd
+        label.ZIndex = 151
+        label.TextSize = 14
+        label.TextTransparency = 1
+        label.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+        label.TextColor3 = Color3.fromRGB(241, 241, 241)
+        label.BackgroundTransparency = 1
+        label.AnchorPoint = Vector2.new(0.5, 0.5)
+        label.Size = UDim2.new(0, 74, 0, 19)
+        label.Text = name
+        label.Name = "Label"
+        label.Position = UDim2.new(0.5, 0, 0.5, 0)
+        label.Parent = frame
+        
+        local interact = Instance.new("TextButton")
+        interact.TextTransparency = 1
+        interact.AutoButtonColor = false
+        interact.ZIndex = 155
+        interact.AnchorPoint = Vector2.new(0.5, 0.5)
+        interact.BackgroundTransparency = 1
+        interact.Size = UDim2.new(1, 0, 1, 0)
+        interact.Text = ""
+        interact.Name = "Interact"
+        interact.Position = UDim2.new(0.5, 0, 0.5, 0)
+        interact.Parent = frame
+        
         table.insert(TabsData, tabData)
+        table.insert(TabButtons, frame)
+        
+        interact.MouseButton1Click:Connect(function()
+            SwitchTab(tabData)
+        end)
         
         if #TabsData == 1 then
-            Sable:SwitchTab(tabData)
+            SwitchTab(tabData)
         end
         
         local Tab = {}
