@@ -11,6 +11,8 @@ local Mouse = LocalPlayer:GetMouse()
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "Sable"
 ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
 ScreenGui.Parent = CoreGui
 
 local TabsData = {}
@@ -19,16 +21,19 @@ local TabButtons = {}
 local Flags = {}
 
 local Colors = {
-    Highlight = Color3.fromRGB(120, 120, 255),
-    Toggle = Color3.fromRGB(80, 80, 255),
-    BG = Color3.fromRGB(17, 17, 17),
-    Block = Color3.fromRGB(22, 22, 26),
-    Stroke = Color3.fromRGB(37, 38, 43),
-    Text = Color3.fromRGB(255, 255, 255),
-    SubText = Color3.fromRGB(155, 155, 165),
-    Dropdown = Color3.fromRGB(30, 30, 36),
-    Hover = Color3.fromRGB(45, 45, 52),
-    Line = Color3.fromRGB(50, 50, 58),
+    Accent = Color3.fromRGB(120, 130, 255),
+    Toggle = Color3.fromRGB(110, 120, 255),
+    BG = Color3.fromRGB(15, 15, 19),
+    Sidebar = Color3.fromRGB(11, 11, 14),
+    TopBar = Color3.fromRGB(19, 19, 24),
+    Content = Color3.fromRGB(18, 18, 23),
+    Block = Color3.fromRGB(23, 23, 29),
+    Stroke = Color3.fromRGB(40, 40, 49),
+    Text = Color3.fromRGB(240, 240, 245),
+    SubText = Color3.fromRGB(150, 150, 163),
+    Element = Color3.fromRGB(27, 27, 34),
+    ElementHover = Color3.fromRGB(33, 33, 41),
+    InputBG = Color3.fromRGB(35, 35, 44),
 }
 
 local Icons = {
@@ -64,18 +69,12 @@ local function GetIcon(name)
 end
 
 local function Round(num, decimals)
-    local mult = 10^(decimals or 0)
+    local mult = 10 ^ (decimals or 0)
     return math.floor(num * mult + 0.5) / mult
 end
 
-local function IsMouseOver(frame)
-    if not frame then return false end
-    local pos, size = frame.AbsolutePosition, frame.AbsoluteSize
-    return Mouse.X >= pos.X and Mouse.X <= pos.X + size.X and Mouse.Y >= pos.Y and Mouse.Y <= pos.Y + size.Y
-end
-
 local function Tween(obj, info, props)
-    local tween = TweenService:Create(obj, info or TweenInfo.new(0.25), props)
+    local tween = TweenService:Create(obj, info or TweenInfo.new(0.2, Enum.EasingStyle.Quint), props)
     tween:Play()
     return tween
 end
@@ -92,6 +91,27 @@ local function CreateInputButton(parent, callback)
     return btn
 end
 
+local function Corner(parent, radius)
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, radius or 6)
+    c.Parent = parent
+    return c
+end
+
+local function Stroke(parent, color, transparency, thickness)
+    local s = Instance.new("UIStroke")
+    s.Color = color or Colors.Stroke
+    s.Transparency = transparency or 0.5
+    s.Thickness = thickness or 1
+    s.Parent = parent
+    return s
+end
+
+local function Hover(frame, onEnter, onLeave)
+    frame.MouseEnter:Connect(onEnter)
+    frame.MouseLeave:Connect(onLeave)
+end
+
 function Sable:CreateWindow(config)
     config = config or {}
 
@@ -104,120 +124,119 @@ function Sable:CreateWindow(config)
     end
 
     local Window = {}
-    local WindowTabs = {}
     local TabIndex = 0
     local IsOpen = true
-    local SelectedTab = nil
 
     local MainFrame = Instance.new("Frame")
-    MainFrame.Size = UDim2.new(0, 500, 0, 450)
-    MainFrame.Position = UDim2.new(0.5, -250, 0.5, -225)
+    MainFrame.Size = UDim2.new(0, 540, 0, 460)
+    MainFrame.Position = UDim2.new(0.5, -270, 0.5, -230)
     MainFrame.BackgroundColor3 = Colors.BG
     MainFrame.BorderSizePixel = 0
     MainFrame.ClipsDescendants = true
     MainFrame.Parent = ScreenGui
-
-    local MainCorner = Instance.new("UICorner")
-    MainCorner.CornerRadius = UDim.new(0, 12)
-    MainCorner.Parent = MainFrame
+    Corner(MainFrame, 14)
 
     local Shadow = Instance.new("ImageLabel")
-    Shadow.Size = UDim2.new(1, 40, 1, 40)
-    Shadow.Position = UDim2.new(0, -20, 0, -20)
+    Shadow.Size = UDim2.new(1, 60, 1, 60)
+    Shadow.Position = UDim2.new(0, -30, 0, -30)
     Shadow.BackgroundTransparency = 1
     Shadow.Image = "rbxassetid://1316044590"
     Shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
-    Shadow.ImageTransparency = 0.5
+    Shadow.ImageTransparency = 0.4
     Shadow.ScaleType = Enum.ScaleType.Slice
     Shadow.SliceCenter = Rect.new(20, 20, 20, 20)
+    Shadow.ZIndex = -1
     Shadow.Parent = MainFrame
 
     local TopBar = Instance.new("Frame")
-    TopBar.Size = UDim2.new(1, 0, 0, 45)
-    TopBar.BackgroundColor3 = Color3.fromRGB(22, 22, 26)
+    TopBar.Size = UDim2.new(1, 0, 0, 46)
+    TopBar.BackgroundColor3 = Colors.TopBar
     TopBar.BorderSizePixel = 0
     TopBar.Parent = MainFrame
+    Corner(TopBar, 14)
 
-    local TopCorner = Instance.new("UICorner")
-    TopCorner.CornerRadius = UDim.new(0, 12)
-    TopCorner.Parent = TopBar
+    local TopBarMask = Instance.new("Frame")
+    TopBarMask.Size = UDim2.new(1, 0, 0, 14)
+    TopBarMask.Position = UDim2.new(0, 0, 1, -14)
+    TopBarMask.BackgroundColor3 = Colors.TopBar
+    TopBarMask.BorderSizePixel = 0
+    TopBarMask.ZIndex = 0
+    TopBarMask.Parent = TopBar
+
+    local AccentLine = Instance.new("Frame")
+    AccentLine.Size = UDim2.new(1, 0, 0, 1)
+    AccentLine.Position = UDim2.new(0, 0, 1, 0)
+    AccentLine.BackgroundColor3 = Colors.Accent
+    AccentLine.BackgroundTransparency = 0.55
+    AccentLine.BorderSizePixel = 0
+    AccentLine.ZIndex = 3
+    AccentLine.Parent = TopBar
 
     local TopLogo = Instance.new("ImageLabel")
-    TopLogo.Size = UDim2.new(0, 28, 0, 28)
-    TopLogo.Position = UDim2.new(0, 12, 0.5, -14)
+    TopLogo.Size = UDim2.new(0, 24, 0, 24)
+    TopLogo.Position = UDim2.new(0, 14, 0.5, -12)
     TopLogo.BackgroundTransparency = 1
     TopLogo.Image = Logo
+    TopLogo.ImageColor3 = Colors.Accent
     TopLogo.Parent = TopBar
 
     local Title = Instance.new("TextLabel")
-    Title.Size = UDim2.new(1, -100, 1, 0)
+    Title.Size = UDim2.new(1, -140, 1, 0)
     Title.Position = UDim2.new(0, 48, 0, 0)
     Title.BackgroundTransparency = 1
     Title.Text = WindowName
     Title.TextColor3 = Colors.Text
-    Title.TextSize = 16
+    Title.TextSize = 15
     Title.TextXAlignment = Enum.TextXAlignment.Left
     Title.Font = Enum.Font.GothamBold
     Title.Parent = TopBar
 
     local CloseBtn = Instance.new("TextButton")
-    CloseBtn.Size = UDim2.new(0, 30, 0, 30)
-    CloseBtn.Position = UDim2.new(1, -40, 0, 7.5)
-    CloseBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+    CloseBtn.Size = UDim2.new(0, 28, 0, 28)
+    CloseBtn.Position = UDim2.new(1, -38, 0.5, -14)
+    CloseBtn.BackgroundColor3 = Colors.Element
+    CloseBtn.BackgroundTransparency = 0.3
     CloseBtn.BorderSizePixel = 0
-    CloseBtn.Text = "X"
-    CloseBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-    CloseBtn.TextSize = 14
+    CloseBtn.Text = "x"
+    CloseBtn.TextColor3 = Colors.SubText
+    CloseBtn.TextSize = 15
     CloseBtn.Font = Enum.Font.GothamBold
     CloseBtn.Parent = TopBar
-
-    local CloseCorner = Instance.new("UICorner")
-    CloseCorner.CornerRadius = UDim.new(1, 0)
-    CloseCorner.Parent = CloseBtn
+    Corner(CloseBtn, 8)
 
     CloseBtn.MouseButton1Click:Connect(function()
         IsOpen = false
         MainFrame.Visible = false
     end)
 
-    CloseBtn.MouseEnter:Connect(function()
-        CloseBtn.BackgroundColor3 = Color3.fromRGB(60, 30, 30)
-        CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    end)
-
-    CloseBtn.MouseLeave:Connect(function()
-        CloseBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
-        CloseBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+    Hover(CloseBtn, function()
+        Tween(CloseBtn, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromRGB(190, 70, 70), BackgroundTransparency = 0.1, TextColor3 = Colors.Text })
+    end, function()
+        Tween(CloseBtn, TweenInfo.new(0.15), { BackgroundColor3 = Colors.Element, BackgroundTransparency = 0.3, TextColor3 = Colors.SubText })
     end)
 
     local MinBtn = Instance.new("TextButton")
-    MinBtn.Size = UDim2.new(0, 30, 0, 30)
-    MinBtn.Position = UDim2.new(1, -75, 0, 7.5)
-    MinBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
+    MinBtn.Size = UDim2.new(0, 28, 0, 28)
+    MinBtn.Position = UDim2.new(1, -72, 0.5, -14)
+    MinBtn.BackgroundColor3 = Colors.Element
+    MinBtn.BackgroundTransparency = 0.3
     MinBtn.BorderSizePixel = 0
-    MinBtn.Text = "—"
-    MinBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-    MinBtn.TextSize = 18
+    MinBtn.Text = "-"
+    MinBtn.TextColor3 = Colors.SubText
+    MinBtn.TextSize = 14
     MinBtn.Font = Enum.Font.GothamBold
     MinBtn.Parent = TopBar
-
-    local MinCorner = Instance.new("UICorner")
-    MinCorner.CornerRadius = UDim.new(1, 0)
-    MinCorner.Parent = MinBtn
+    Corner(MinBtn, 8)
 
     MinBtn.MouseButton1Click:Connect(function()
         IsOpen = not IsOpen
         MainFrame.Visible = IsOpen
     end)
 
-    MinBtn.MouseEnter:Connect(function()
-        MinBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 48)
-        MinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    end)
-
-    MinBtn.MouseLeave:Connect(function()
-        MinBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
-        MinBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+    Hover(MinBtn, function()
+        Tween(MinBtn, TweenInfo.new(0.15), { BackgroundColor3 = Colors.ElementHover, BackgroundTransparency = 0.1, TextColor3 = Colors.Text })
+    end, function()
+        Tween(MinBtn, TweenInfo.new(0.15), { BackgroundColor3 = Colors.Element, BackgroundTransparency = 0.3, TextColor3 = Colors.SubText })
     end)
 
     local Dragging = false
@@ -245,11 +264,19 @@ function Sable:CreateWindow(config)
     end)
 
     local Sidebar = Instance.new("Frame")
-    Sidebar.Size = UDim2.new(0, 130, 1, -45)
-    Sidebar.Position = UDim2.new(0, 0, 0, 45)
-    Sidebar.BackgroundColor3 = Color3.fromRGB(12, 12, 14)
+    Sidebar.Size = UDim2.new(0, 145, 1, -46)
+    Sidebar.Position = UDim2.new(0, 0, 0, 46)
+    Sidebar.BackgroundColor3 = Colors.Sidebar
     Sidebar.BorderSizePixel = 0
     Sidebar.Parent = MainFrame
+
+    local SidebarLine = Instance.new("Frame")
+    SidebarLine.Size = UDim2.new(0, 1, 1, 0)
+    SidebarLine.Position = UDim2.new(1, -1, 0, 0)
+    SidebarLine.BackgroundColor3 = Colors.Stroke
+    SidebarLine.BackgroundTransparency = 0.4
+    SidebarLine.BorderSizePixel = 0
+    SidebarLine.Parent = Sidebar
 
     local TabScroll = Instance.new("ScrollingFrame")
     TabScroll.Size = UDim2.new(1, 0, 1, 0)
@@ -257,32 +284,38 @@ function Sable:CreateWindow(config)
     TabScroll.BorderSizePixel = 0
     TabScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
     TabScroll.ScrollBarThickness = 2
-    TabScroll.ScrollBarImageColor3 = Color3.fromRGB(60, 60, 70)
+    TabScroll.ScrollBarImageColor3 = Colors.Stroke
     TabScroll.Parent = Sidebar
 
     local TabLayout = Instance.new("UIListLayout")
-    TabLayout.Padding = UDim.new(0, 4)
+    TabLayout.Padding = UDim.new(0, 3)
     TabLayout.SortOrder = Enum.SortOrder.LayoutOrder
     TabLayout.Parent = TabScroll
 
     local TabPadding = Instance.new("UIPadding")
-    TabPadding.PaddingTop = UDim.new(0, 8)
-    TabPadding.PaddingBottom = UDim.new(0, 8)
-    TabPadding.PaddingLeft = UDim.new(0, 6)
-    TabPadding.PaddingRight = UDim.new(0, 6)
+    TabPadding.PaddingTop = UDim.new(0, 10)
+    TabPadding.PaddingBottom = UDim.new(0, 10)
+    TabPadding.PaddingLeft = UDim.new(0, 8)
+    TabPadding.PaddingRight = UDim.new(0, 8)
     TabPadding.Parent = TabScroll
 
+    -- sliding selection indicator that glides between tab buttons
+    local SelectionIndicator = Instance.new("Frame")
+    SelectionIndicator.Size = UDim2.new(0, 3, 0, 26)
+    SelectionIndicator.BackgroundColor3 = Colors.Accent
+    SelectionIndicator.BorderSizePixel = 0
+    SelectionIndicator.ZIndex = 5
+    SelectionIndicator.Parent = Sidebar
+    Corner(SelectionIndicator, 2)
+
     local ContentFrame = Instance.new("Frame")
-    ContentFrame.Size = UDim2.new(1, -130, 1, -45)
-    ContentFrame.Position = UDim2.new(0, 130, 0, 45)
-    ContentFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 24)
+    ContentFrame.Size = UDim2.new(1, -145, 1, -46)
+    ContentFrame.Position = UDim2.new(0, 145, 0, 46)
+    ContentFrame.BackgroundColor3 = Colors.Content
     ContentFrame.BorderSizePixel = 0
     ContentFrame.ClipsDescendants = true
     ContentFrame.Parent = MainFrame
-
-    local ContentCorner = Instance.new("UICorner")
-    ContentCorner.CornerRadius = UDim.new(0, 12)
-    ContentCorner.Parent = ContentFrame
+    Corner(ContentFrame, 14)
 
     local ContentContainer = Instance.new("ScrollingFrame")
     ContentContainer.Size = UDim2.new(1, 0, 1, 0)
@@ -290,19 +323,19 @@ function Sable:CreateWindow(config)
     ContentContainer.BorderSizePixel = 0
     ContentContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
     ContentContainer.ScrollBarThickness = 3
-    ContentContainer.ScrollBarImageColor3 = Color3.fromRGB(60, 60, 70)
+    ContentContainer.ScrollBarImageColor3 = Colors.Stroke
     ContentContainer.Parent = ContentFrame
 
     local ContentLayout = Instance.new("UIListLayout")
-    ContentLayout.Padding = UDim.new(0, 6)
+    ContentLayout.Padding = UDim.new(0, 8)
     ContentLayout.SortOrder = Enum.SortOrder.LayoutOrder
     ContentLayout.Parent = ContentContainer
 
     local ContentPadding = Instance.new("UIPadding")
-    ContentPadding.PaddingTop = UDim.new(0, 10)
-    ContentPadding.PaddingBottom = UDim.new(0, 10)
-    ContentPadding.PaddingLeft = UDim.new(0, 10)
-    ContentPadding.PaddingRight = UDim.new(0, 10)
+    ContentPadding.PaddingTop = UDim.new(0, 14)
+    ContentPadding.PaddingBottom = UDim.new(0, 14)
+    ContentPadding.PaddingLeft = UDim.new(0, 14)
+    ContentPadding.PaddingRight = UDim.new(0, 14)
     ContentPadding.Parent = ContentContainer
 
     UserInputService.InputBegan:Connect(function(input, gameProcessed)
@@ -310,6 +343,21 @@ function Sable:CreateWindow(config)
         if input.KeyCode == Keybind then
             IsOpen = not IsOpen
             MainFrame.Visible = IsOpen
+        end
+    end)
+
+    -- keep the sidebar indicator glued to whichever tab button is active
+    local ActiveTabButton = nil
+
+    task.spawn(function()
+        while ScreenGui.Parent do
+            task.wait()
+            if ActiveTabButton and ActiveTabButton.Parent then
+                local targetY = ActiveTabButton.Position.Y.Offset + (ActiveTabButton.AbsoluteSize.Y / 2) - (SelectionIndicator.AbsoluteSize.Y / 2)
+                if math.abs(SelectionIndicator.Position.Y.Offset - targetY) > 0.5 then
+                    Tween(SelectionIndicator, TweenInfo.new(0.25, Enum.EasingStyle.Quint), { Position = UDim2.new(0, 4, 0, targetY) })
+                end
+            end
         end
     end)
 
@@ -342,70 +390,57 @@ function Sable:CreateWindow(config)
         }
 
         local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(1, 0, 0, 38)
-        btn.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+        btn.Size = UDim2.new(1, 0, 0, 36)
+        btn.BackgroundColor3 = Colors.Element
+        btn.BackgroundTransparency = 1
         btn.BorderSizePixel = 0
         btn.Text = ""
         btn.Parent = TabScroll
-
-        local btnCorner = Instance.new("UICorner")
-        btnCorner.CornerRadius = UDim.new(0, 6)
-        btnCorner.Parent = btn
+        Corner(btn, 8)
 
         local iconLabel = Instance.new("ImageLabel")
-        iconLabel.Size = UDim2.new(0, 18, 0, 18)
-        iconLabel.Position = UDim2.new(0, 10, 0.5, -9)
+        iconLabel.Size = UDim2.new(0, 16, 0, 16)
+        iconLabel.Position = UDim2.new(0, 12, 0.5, -8)
         iconLabel.BackgroundTransparency = 1
         iconLabel.Image = TabIcon
-        iconLabel.ImageColor3 = Color3.fromRGB(180, 180, 190)
+        iconLabel.ImageColor3 = Colors.SubText
         iconLabel.Parent = btn
 
         local label = Instance.new("TextLabel")
-        label.Size = UDim2.new(1, -38, 1, 0)
+        label.Size = UDim2.new(1, -36, 1, 0)
         label.Position = UDim2.new(0, 34, 0, 0)
         label.BackgroundTransparency = 1
         label.Text = TabName
-        label.TextColor3 = Color3.fromRGB(200, 200, 210)
+        label.TextColor3 = Colors.SubText
         label.TextSize = 13
         label.TextXAlignment = Enum.TextXAlignment.Left
-        label.Font = Enum.Font.GothamSemibold
+        label.Font = Enum.Font.GothamMedium
         label.Parent = btn
 
-        local indicator = Instance.new("Frame")
-        indicator.Name = "Indicator"
-        indicator.Size = UDim2.new(0, 3, 0, 20)
-        indicator.Position = UDim2.new(1, -4, 0.5, -10)
-        indicator.BackgroundColor3 = Colors.Highlight
-        indicator.BorderSizePixel = 0
-        indicator.Visible = false
-        indicator.Parent = btn
+        table.insert(TabButtons, { Button = btn, Icon = iconLabel, Label = label })
 
-        local indCorner = Instance.new("UICorner")
-        indCorner.CornerRadius = UDim.new(1, 0)
-        indCorner.Parent = indicator
-
-        table.insert(TabButtons, btn)
-
-        btn.MouseButton1Click:Connect(function()
+        local function selectThis()
             for _, b in pairs(TabButtons) do
-                local ind = b:FindFirstChild("Indicator")
-                if ind then ind.Visible = false end
-                b.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+                Tween(b.Button, TweenInfo.new(0.2), { BackgroundTransparency = 1 })
+                Tween(b.Icon, TweenInfo.new(0.2), { ImageColor3 = Colors.SubText })
+                Tween(b.Label, TweenInfo.new(0.2), { TextColor3 = Colors.SubText })
             end
-            indicator.Visible = true
-            btn.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
+            Tween(btn, TweenInfo.new(0.2), { BackgroundTransparency = 0.85 })
+            Tween(iconLabel, TweenInfo.new(0.2), { ImageColor3 = Colors.Accent })
+            Tween(label, TweenInfo.new(0.2), { TextColor3 = Colors.Text })
+            ActiveTabButton = btn
             SwitchTab(tabData)
-        end)
+        end
 
-        btn.MouseEnter:Connect(function()
-            if not indicator.Visible then
-                btn.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
+        btn.MouseButton1Click:Connect(selectThis)
+
+        Hover(btn, function()
+            if ActiveTabButton ~= btn then
+                Tween(btn, TweenInfo.new(0.15), { BackgroundTransparency = 0.92 })
             end
-        end)
-
-        btn.MouseLeave:Connect(function()
-            if not indicator.Visible then
-                btn.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+        end, function()
+            if ActiveTabButton ~= btn then
+                Tween(btn, TweenInfo.new(0.15), { BackgroundTransparency = 1 })
             end
         end)
 
@@ -425,9 +460,7 @@ function Sable:CreateWindow(config)
         tabData.Content = TabContent
 
         if #TabsData == 1 then
-            indicator.Visible = true
-            btn.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
-            SwitchTab(tabData)
+            selectThis()
         end
 
         local Tab = {}
@@ -436,10 +469,7 @@ function Sable:CreateWindow(config)
             config = config or {}
             local SectionName = config.Name or ""
 
-            local sectionData = {
-                Name = SectionName,
-                Elements = {}
-            }
+            local sectionData = { Name = SectionName, Elements = {} }
 
             local sectionFrame = Instance.new("Frame")
             sectionFrame.Size = UDim2.new(1, 0, 0, 0)
@@ -448,15 +478,8 @@ function Sable:CreateWindow(config)
             sectionFrame.ClipsDescendants = true
             sectionFrame.AutomaticSize = Enum.AutomaticSize.Y
             sectionFrame.Parent = TabContent
-
-            local sectionCorner = Instance.new("UICorner")
-            sectionCorner.CornerRadius = UDim.new(0, 8)
-            sectionCorner.Parent = sectionFrame
-
-            local sectionStroke = Instance.new("UIStroke")
-            sectionStroke.Color = Colors.Stroke
-            sectionStroke.Transparency = 0.5
-            sectionStroke.Parent = sectionFrame
+            Corner(sectionFrame, 10)
+            Stroke(sectionFrame, Colors.Stroke, 0.4)
 
             local header = Instance.new("Frame")
             header.Size = UDim2.new(1, 0, 0, 38)
@@ -465,7 +488,7 @@ function Sable:CreateWindow(config)
 
             local headerLabel = Instance.new("TextLabel")
             headerLabel.Size = UDim2.new(1, -40, 1, 0)
-            headerLabel.Position = UDim2.new(0, 12, 0, 0)
+            headerLabel.Position = UDim2.new(0, 14, 0, 0)
             headerLabel.BackgroundTransparency = 1
             headerLabel.Text = SectionName
             headerLabel.TextColor3 = Colors.Text
@@ -475,8 +498,8 @@ function Sable:CreateWindow(config)
             headerLabel.Parent = header
 
             local headerArrow = Instance.new("ImageLabel")
-            headerArrow.Size = UDim2.new(0, 16, 0, 16)
-            headerArrow.Position = UDim2.new(1, -30, 0.5, -8)
+            headerArrow.Size = UDim2.new(0, 14, 0, 14)
+            headerArrow.Position = UDim2.new(1, -28, 0.5, -7)
             headerArrow.BackgroundTransparency = 1
             headerArrow.Image = GetIcon("dropdown")
             headerArrow.ImageColor3 = Colors.SubText
@@ -490,21 +513,21 @@ function Sable:CreateWindow(config)
             elementContainer.Parent = sectionFrame
 
             local elementLayout = Instance.new("UIListLayout")
-            elementLayout.Padding = UDim.new(0, 4)
+            elementLayout.Padding = UDim.new(0, 5)
             elementLayout.SortOrder = Enum.SortOrder.LayoutOrder
             elementLayout.Parent = elementContainer
 
             local elementPadding = Instance.new("UIPadding")
-            elementPadding.PaddingTop = UDim.new(0, 4)
-            elementPadding.PaddingBottom = UDim.new(0, 8)
-            elementPadding.PaddingLeft = UDim.new(0, 10)
-            elementPadding.PaddingRight = UDim.new(0, 10)
+            elementPadding.PaddingTop = UDim.new(0, 2)
+            elementPadding.PaddingBottom = UDim.new(0, 10)
+            elementPadding.PaddingLeft = UDim.new(0, 12)
+            elementPadding.PaddingRight = UDim.new(0, 12)
             elementPadding.Parent = elementContainer
 
-            local headerBtn = CreateInputButton(header, function()
+            CreateInputButton(header, function()
                 isOpen = not isOpen
                 elementContainer.Visible = isOpen
-                headerArrow.Rotation = isOpen and 0 or 180
+                Tween(headerArrow, TweenInfo.new(0.2), { Rotation = isOpen and 0 or 180 })
             end)
 
             local Section = {}
@@ -516,14 +539,11 @@ function Sable:CreateWindow(config)
                 local Callback = config.Callback or function() end
 
                 local frame = Instance.new("Frame")
-                frame.Size = UDim2.new(1, 0, 0, 36)
-                frame.BackgroundColor3 = Color3.fromRGB(26, 26, 32)
+                frame.Size = UDim2.new(1, 0, 0, 34)
+                frame.BackgroundColor3 = Colors.Element
                 frame.BorderSizePixel = 0
                 frame.Parent = elementContainer
-
-                local corner = Instance.new("UICorner")
-                corner.CornerRadius = UDim.new(0, 6)
-                corner.Parent = frame
+                Corner(frame, 7)
 
                 local label = Instance.new("TextLabel")
                 label.Size = UDim2.new(1, -60, 1, 0)
@@ -537,62 +557,49 @@ function Sable:CreateWindow(config)
                 label.Parent = frame
 
                 local toggle = Instance.new("Frame")
-                toggle.Size = UDim2.new(0, 38, 0, 20)
-                toggle.Position = UDim2.new(1, -50, 0.5, -10)
-                toggle.BackgroundColor3 = Color3.fromRGB(50, 50, 58)
+                toggle.Size = UDim2.new(0, 36, 0, 19)
+                toggle.Position = UDim2.new(1, -48, 0.5, -9.5)
+                toggle.BackgroundColor3 = Colors.InputBG
                 toggle.BorderSizePixel = 0
                 toggle.Parent = frame
-
-                local tCorner = Instance.new("UICorner")
-                tCorner.CornerRadius = UDim.new(1, 0)
-                tCorner.Parent = toggle
+                Corner(toggle, 10)
 
                 local dot = Instance.new("Frame")
-                dot.Size = UDim2.new(0, 14, 0, 14)
-                dot.Position = UDim2.new(0, 3, 0.5, -7)
-                dot.BackgroundColor3 = Color3.fromRGB(200, 200, 210)
+                dot.Size = UDim2.new(0, 13, 0, 13)
+                dot.Position = UDim2.new(0, 3, 0.5, -6.5)
+                dot.BackgroundColor3 = Color3.fromRGB(220, 220, 228)
                 dot.BorderSizePixel = 0
                 dot.Parent = toggle
-
-                local dCorner = Instance.new("UICorner")
-                dCorner.CornerRadius = UDim.new(1, 0)
-                dCorner.Parent = dot
+                Corner(dot, 7)
 
                 local state = Default
 
                 local function update()
                     if state then
-                        toggle.BackgroundColor3 = Colors.Toggle
-                        dot.Position = UDim2.new(0, 21, 0.5, -7)
+                        Tween(toggle, TweenInfo.new(0.2), { BackgroundColor3 = Colors.Toggle })
+                        Tween(dot, TweenInfo.new(0.2), { Position = UDim2.new(0, 20, 0.5, -6.5), BackgroundColor3 = Color3.fromRGB(255, 255, 255) })
                     else
-                        toggle.BackgroundColor3 = Color3.fromRGB(50, 50, 58)
-                        dot.Position = UDim2.new(0, 3, 0.5, -7)
+                        Tween(toggle, TweenInfo.new(0.2), { BackgroundColor3 = Colors.InputBG })
+                        Tween(dot, TweenInfo.new(0.2), { Position = UDim2.new(0, 3, 0.5, -6.5), BackgroundColor3 = Color3.fromRGB(220, 220, 228) })
                     end
                 end
                 update()
 
-                local btn = CreateInputButton(frame, function()
+                CreateInputButton(frame, function()
                     state = not state
                     update()
                     Callback(state)
                 end)
 
-                btn.MouseEnter:Connect(function()
-                    frame.BackgroundColor3 = Color3.fromRGB(32, 32, 38)
-                end)
-                btn.MouseLeave:Connect(function()
-                    frame.BackgroundColor3 = Color3.fromRGB(26, 26, 32)
+                Hover(frame, function()
+                    Tween(frame, TweenInfo.new(0.15), { BackgroundColor3 = Colors.ElementHover })
+                end, function()
+                    Tween(frame, TweenInfo.new(0.15), { BackgroundColor3 = Colors.Element })
                 end)
 
                 local obj = {
-                    SetValue = function(self, v)
-                        state = v
-                        update()
-                        Callback(v)
-                    end,
-                    GetValue = function()
-                        return state
-                    end
+                    SetValue = function(self, v) state = v update() Callback(v) end,
+                    GetValue = function() return state end
                 }
                 table.insert(sectionData.Elements, frame)
                 return obj
@@ -604,14 +611,11 @@ function Sable:CreateWindow(config)
                 local Callback = config.Callback or function() end
 
                 local frame = Instance.new("Frame")
-                frame.Size = UDim2.new(1, 0, 0, 36)
-                frame.BackgroundColor3 = Color3.fromRGB(26, 26, 32)
+                frame.Size = UDim2.new(1, 0, 0, 34)
+                frame.BackgroundColor3 = Colors.Element
                 frame.BorderSizePixel = 0
                 frame.Parent = elementContainer
-
-                local corner = Instance.new("UICorner")
-                corner.CornerRadius = UDim.new(0, 6)
-                corner.Parent = frame
+                Corner(frame, 7)
 
                 local label = Instance.new("TextLabel")
                 label.Size = UDim2.new(1, -16, 1, 0)
@@ -624,13 +628,12 @@ function Sable:CreateWindow(config)
                 label.Font = Enum.Font.Gotham
                 label.Parent = frame
 
-                local btn = CreateInputButton(frame, Callback)
+                CreateInputButton(frame, Callback)
 
-                btn.MouseEnter:Connect(function()
-                    frame.BackgroundColor3 = Color3.fromRGB(32, 32, 38)
-                end)
-                btn.MouseLeave:Connect(function()
-                    frame.BackgroundColor3 = Color3.fromRGB(26, 26, 32)
+                Hover(frame, function()
+                    Tween(frame, TweenInfo.new(0.15), { BackgroundColor3 = Colors.ElementHover })
+                end, function()
+                    Tween(frame, TweenInfo.new(0.15), { BackgroundColor3 = Colors.Element })
                 end)
 
                 table.insert(sectionData.Elements, frame)
@@ -646,14 +649,11 @@ function Sable:CreateWindow(config)
                 local Callback = config.Callback or function() end
 
                 local frame = Instance.new("Frame")
-                frame.Size = UDim2.new(1, 0, 0, 48)
-                frame.BackgroundColor3 = Color3.fromRGB(26, 26, 32)
+                frame.Size = UDim2.new(1, 0, 0, 46)
+                frame.BackgroundColor3 = Colors.Element
                 frame.BorderSizePixel = 0
                 frame.Parent = elementContainer
-
-                local corner = Instance.new("UICorner")
-                corner.CornerRadius = UDim.new(0, 6)
-                corner.Parent = frame
+                Corner(frame, 7)
 
                 local label = Instance.new("TextLabel")
                 label.Size = UDim2.new(0.7, -10, 0.5, 0)
@@ -671,32 +671,26 @@ function Sable:CreateWindow(config)
                 valueLabel.Position = UDim2.new(0.7, 0, 0, 0)
                 valueLabel.BackgroundTransparency = 1
                 valueLabel.Text = tostring(Default)
-                valueLabel.TextColor3 = Colors.Highlight
+                valueLabel.TextColor3 = Colors.Accent
                 valueLabel.TextSize = 13
                 valueLabel.TextXAlignment = Enum.TextXAlignment.Right
                 valueLabel.Font = Enum.Font.GothamBold
                 valueLabel.Parent = frame
 
                 local bar = Instance.new("Frame")
-                bar.Size = UDim2.new(1, -24, 0, 4)
-                bar.Position = UDim2.new(0, 12, 1, -10)
-                bar.BackgroundColor3 = Color3.fromRGB(45, 45, 52)
+                bar.Size = UDim2.new(1, -24, 0, 5)
+                bar.Position = UDim2.new(0, 12, 1, -12)
+                bar.BackgroundColor3 = Colors.InputBG
                 bar.BorderSizePixel = 0
                 bar.Parent = frame
-
-                local bCorner = Instance.new("UICorner")
-                bCorner.CornerRadius = UDim.new(1, 0)
-                bCorner.Parent = bar
+                Corner(bar, 3)
 
                 local fill = Instance.new("Frame")
                 fill.Size = UDim2.new((Default - Min) / (Max - Min), 0, 1, 0)
-                fill.BackgroundColor3 = Colors.Highlight
+                fill.BackgroundColor3 = Colors.Accent
                 fill.BorderSizePixel = 0
                 fill.Parent = bar
-
-                local fCorner = Instance.new("UICorner")
-                fCorner.CornerRadius = UDim.new(1, 0)
-                fCorner.Parent = fill
+                Corner(fill, 3)
 
                 local value = Default
                 local dragging = false
@@ -710,9 +704,7 @@ function Sable:CreateWindow(config)
                 end
 
                 local btn = CreateInputButton(frame)
-                btn.MouseButton1Down:Connect(function()
-                    dragging = true
-                end)
+                btn.MouseButton1Down:Connect(function() dragging = true end)
 
                 UserInputService.InputChanged:Connect(function(input)
                     if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
@@ -726,11 +718,10 @@ function Sable:CreateWindow(config)
                     end
                 end)
 
-                btn.MouseEnter:Connect(function()
-                    frame.BackgroundColor3 = Color3.fromRGB(32, 32, 38)
-                end)
-                btn.MouseLeave:Connect(function()
-                    frame.BackgroundColor3 = Color3.fromRGB(26, 26, 32)
+                Hover(frame, function()
+                    Tween(frame, TweenInfo.new(0.15), { BackgroundColor3 = Colors.ElementHover })
+                end, function()
+                    Tween(frame, TweenInfo.new(0.15), { BackgroundColor3 = Colors.Element })
                 end)
 
                 local obj = {
@@ -740,9 +731,7 @@ function Sable:CreateWindow(config)
                         valueLabel.Text = tostring(v)
                         Callback(v)
                     end,
-                    GetValue = function()
-                        return value
-                    end
+                    GetValue = function() return value end
                 }
                 table.insert(sectionData.Elements, frame)
                 return obj
@@ -756,14 +745,11 @@ function Sable:CreateWindow(config)
                 local Callback = config.Callback or function() end
 
                 local frame = Instance.new("Frame")
-                frame.Size = UDim2.new(1, 0, 0, 36)
-                frame.BackgroundColor3 = Color3.fromRGB(26, 26, 32)
+                frame.Size = UDim2.new(1, 0, 0, 34)
+                frame.BackgroundColor3 = Colors.Element
                 frame.BorderSizePixel = 0
                 frame.Parent = elementContainer
-
-                local corner = Instance.new("UICorner")
-                corner.CornerRadius = UDim.new(0, 6)
-                corner.Parent = frame
+                Corner(frame, 7)
 
                 local label = Instance.new("TextLabel")
                 label.Size = UDim2.new(0.35, -5, 1, 0)
@@ -779,31 +765,24 @@ function Sable:CreateWindow(config)
                 local box = Instance.new("TextBox")
                 box.Size = UDim2.new(0.65, -15, 1, -8)
                 box.Position = UDim2.new(0.35, 0, 0, 4)
-                box.BackgroundColor3 = Color3.fromRGB(40, 40, 48)
+                box.BackgroundColor3 = Colors.InputBG
                 box.BorderSizePixel = 0
                 box.TextColor3 = Colors.Text
                 box.TextSize = 13
                 box.Font = Enum.Font.Gotham
                 box.PlaceholderText = Placeholder
-                box.PlaceholderColor3 = Color3.fromRGB(100, 100, 110)
+                box.PlaceholderColor3 = Colors.SubText
                 box.Text = Default
                 box.Parent = frame
-
-                local bCorner = Instance.new("UICorner")
-                bCorner.CornerRadius = UDim.new(0, 4)
-                bCorner.Parent = box
+                Corner(box, 5)
 
                 box.FocusLost:Connect(function()
                     Callback(box.Text)
                 end)
 
                 local obj = {
-                    SetValue = function(self, v)
-                        box.Text = v
-                    end,
-                    GetValue = function()
-                        return box.Text
-                    end
+                    SetValue = function(self, v) box.Text = v end,
+                    GetValue = function() return box.Text end
                 }
                 table.insert(sectionData.Elements, frame)
                 return obj
@@ -812,19 +791,17 @@ function Sable:CreateWindow(config)
             function Section:AddDropdown(config)
                 config = config or {}
                 local Name = config.Name or "Dropdown"
-                local Options = config.Options or {"Option 1", "Option 2"}
+                local Options = config.Options or { "Option 1", "Option 2" }
                 local Default = config.Default or Options[1]
                 local Callback = config.Callback or function() end
 
                 local frame = Instance.new("Frame")
-                frame.Size = UDim2.new(1, 0, 0, 36)
-                frame.BackgroundColor3 = Color3.fromRGB(26, 26, 32)
+                frame.Size = UDim2.new(1, 0, 0, 34)
+                frame.BackgroundColor3 = Colors.Element
                 frame.BorderSizePixel = 0
+                frame.ClipsDescendants = false
                 frame.Parent = elementContainer
-
-                local corner = Instance.new("UICorner")
-                corner.CornerRadius = UDim.new(0, 6)
-                corner.Parent = frame
+                Corner(frame, 7)
 
                 local label = Instance.new("TextLabel")
                 label.Size = UDim2.new(0.35, -5, 1, 0)
@@ -840,24 +817,24 @@ function Sable:CreateWindow(config)
                 local dropdown = Instance.new("TextButton")
                 dropdown.Size = UDim2.new(0.65, -15, 1, -8)
                 dropdown.Position = UDim2.new(0.35, 0, 0, 4)
-                dropdown.BackgroundColor3 = Color3.fromRGB(40, 40, 48)
+                dropdown.BackgroundColor3 = Colors.InputBG
                 dropdown.BorderSizePixel = 0
-                dropdown.Text = Default
+                dropdown.Text = "  " .. tostring(Default)
                 dropdown.TextColor3 = Colors.Text
                 dropdown.TextSize = 13
+                dropdown.TextXAlignment = Enum.TextXAlignment.Left
                 dropdown.Font = Enum.Font.Gotham
+                dropdown.ZIndex = 20
                 dropdown.Parent = frame
-
-                local dCorner = Instance.new("UICorner")
-                dCorner.CornerRadius = UDim.new(0, 4)
-                dCorner.Parent = dropdown
+                Corner(dropdown, 5)
 
                 local arrow = Instance.new("ImageLabel")
                 arrow.Size = UDim2.new(0, 10, 0, 6)
-                arrow.Position = UDim2.new(1, -14, 0.5, -3)
+                arrow.Position = UDim2.new(1, -16, 0.5, -3)
                 arrow.BackgroundTransparency = 1
                 arrow.Image = GetIcon("dropdown")
                 arrow.ImageColor3 = Colors.SubText
+                arrow.ZIndex = 21
                 arrow.Parent = dropdown
 
                 local open = false
@@ -865,71 +842,82 @@ function Sable:CreateWindow(config)
 
                 dropdown.MouseButton1Click:Connect(function()
                     if open then
-                        if list then list:Destroy() end
+                        if list then
+                            local closingList = list
+                            Tween(closingList, TweenInfo.new(0.15), { Size = UDim2.new(1, 0, 0, 0) })
+                            task.delay(0.15, function() closingList:Destroy() end)
+                            list = nil
+                        end
+                        Tween(arrow, TweenInfo.new(0.15), { Rotation = 0 })
                         open = false
                         return
                     end
 
                     open = true
+                    Tween(arrow, TweenInfo.new(0.15), { Rotation = 180 })
+
                     list = Instance.new("Frame")
-                    list.ZIndex = 100
+                    list.ZIndex = 50
                     list.BorderSizePixel = 0
-                    list.BackgroundColor3 = Color3.fromRGB(40, 40, 48)
+                    list.BackgroundColor3 = Colors.InputBG
                     list.ClipsDescendants = true
                     list.Size = UDim2.new(1, 0, 0, 0)
-                    list.Position = UDim2.new(0, 0, 1, 2)
+                    list.Position = UDim2.new(0, 0, 1, 4)
                     list.Parent = dropdown
-
-                    local lCorner = Instance.new("UICorner")
-                    lCorner.CornerRadius = UDim.new(0, 4)
-                    lCorner.Parent = list
+                    Corner(list, 6)
+                    Stroke(list, Colors.Stroke, 0.4)
 
                     local layout = Instance.new("UIListLayout")
                     layout.Padding = UDim.new(0, 2)
                     layout.SortOrder = Enum.SortOrder.LayoutOrder
                     layout.Parent = list
 
-                    for i, option in pairs(Options) do
+                    local pad = Instance.new("UIPadding")
+                    pad.PaddingTop = UDim.new(0, 3)
+                    pad.PaddingBottom = UDim.new(0, 3)
+                    pad.PaddingLeft = UDim.new(0, 3)
+                    pad.PaddingRight = UDim.new(0, 3)
+                    pad.Parent = list
+
+                    for _, option in pairs(Options) do
                         local opt = Instance.new("TextButton")
-                        opt.Size = UDim2.new(1, -10, 0, 28)
-                        opt.Position = UDim2.new(0, 5, 0, 0)
-                        opt.BackgroundColor3 = Color3.fromRGB(45, 45, 52)
+                        opt.Size = UDim2.new(1, 0, 0, 26)
+                        opt.BackgroundColor3 = Colors.Element
+                        opt.BackgroundTransparency = 1
                         opt.BorderSizePixel = 0
-                        opt.Text = option
+                        opt.Text = "  " .. option
                         opt.TextColor3 = Colors.Text
                         opt.TextSize = 13
+                        opt.TextXAlignment = Enum.TextXAlignment.Left
                         opt.Font = Enum.Font.Gotham
+                        opt.ZIndex = 51
                         opt.Parent = list
-
-                        local oCorner = Instance.new("UICorner")
-                        oCorner.CornerRadius = UDim.new(0, 4)
-                        oCorner.Parent = opt
+                        Corner(opt, 4)
 
                         opt.MouseButton1Click:Connect(function()
-                            dropdown.Text = option
+                            dropdown.Text = "  " .. option
                             Callback(option)
-                            list:Destroy()
+                            local closingList = list
+                            Tween(closingList, TweenInfo.new(0.15), { Size = UDim2.new(1, 0, 0, 0) })
+                            Tween(arrow, TweenInfo.new(0.15), { Rotation = 0 })
+                            task.delay(0.15, function() closingList:Destroy() end)
+                            list = nil
                             open = false
                         end)
 
-                        opt.MouseEnter:Connect(function()
-                            opt.BackgroundColor3 = Color3.fromRGB(55, 55, 62)
-                        end)
-                        opt.MouseLeave:Connect(function()
-                            opt.BackgroundColor3 = Color3.fromRGB(45, 45, 52)
+                        Hover(opt, function()
+                            Tween(opt, TweenInfo.new(0.12), { BackgroundTransparency = 0.4 })
+                        end, function()
+                            Tween(opt, TweenInfo.new(0.12), { BackgroundTransparency = 1 })
                         end)
                     end
 
-                    list.Size = UDim2.new(1, 0, 0, #Options * 30 + 4)
+                    Tween(list, TweenInfo.new(0.18), { Size = UDim2.new(1, 0, 0, #Options * 28 + 6) })
                 end)
 
                 local obj = {
-                    SetValue = function(self, v)
-                        dropdown.Text = v
-                    end,
-                    GetValue = function()
-                        return dropdown.Text
-                    end
+                    SetValue = function(self, v) dropdown.Text = "  " .. tostring(v) end,
+                    GetValue = function() return (dropdown.Text:gsub("^%s+", "")) end
                 }
                 table.insert(sectionData.Elements, frame)
                 return obj
@@ -940,13 +928,13 @@ function Sable:CreateWindow(config)
                 local Text = config.Text or ""
 
                 local frame = Instance.new("Frame")
-                frame.Size = UDim2.new(1, 0, 0, 28)
+                frame.Size = UDim2.new(1, 0, 0, 26)
                 frame.BackgroundTransparency = 1
                 frame.Parent = elementContainer
 
                 local label = Instance.new("TextLabel")
                 label.Size = UDim2.new(1, -10, 1, 0)
-                label.Position = UDim2.new(0, 5, 0, 0)
+                label.Position = UDim2.new(0, 2, 0, 0)
                 label.BackgroundTransparency = 1
                 label.Text = Text
                 label.TextColor3 = Colors.SubText
@@ -970,45 +958,67 @@ function Sable:CreateWindow(config)
 
     function Window:Notify(config)
         config = config or {}
+        local Duration = config.Duration or 3
 
         local notif = Instance.new("Frame")
-        notif.Size = UDim2.new(0, 300, 0, 50)
-        notif.Position = UDim2.new(1, -320, 0, 10)
-        notif.BackgroundColor3 = Color3.fromRGB(25, 25, 32)
+        notif.Size = UDim2.new(0, 260, 0, 56)
+        notif.Position = UDim2.new(1, 20, 0, 16)
+        notif.BackgroundColor3 = Colors.TopBar
         notif.BorderSizePixel = 0
+        notif.ClipsDescendants = true
         notif.Parent = ScreenGui
+        Corner(notif, 10)
+        Stroke(notif, Colors.Stroke, 0.3)
 
-        local nCorner = Instance.new("UICorner")
-        nCorner.CornerRadius = UDim.new(0, 6)
-        nCorner.Parent = notif
+        local accent = Instance.new("Frame")
+        accent.Size = UDim2.new(0, 3, 1, 0)
+        accent.BackgroundColor3 = Colors.Accent
+        accent.BorderSizePixel = 0
+        accent.Parent = notif
 
         local title = Instance.new("TextLabel")
-        title.Size = UDim2.new(1, -20, 0.5, 0)
-        title.Position = UDim2.new(0, 10, 0, 4)
+        title.Size = UDim2.new(1, -24, 0, 20)
+        title.Position = UDim2.new(0, 14, 0, 8)
         title.BackgroundTransparency = 1
         title.Text = config.Title or "Notification"
         title.TextColor3 = Colors.Text
         title.TextSize = 14
         title.Font = Enum.Font.GothamBold
+        title.TextXAlignment = Enum.TextXAlignment.Left
         title.Parent = notif
 
         local desc = Instance.new("TextLabel")
-        desc.Size = UDim2.new(1, -20, 0.5, 0)
-        desc.Position = UDim2.new(0, 10, 0.5, 0)
+        desc.Size = UDim2.new(1, -24, 0, 20)
+        desc.Position = UDim2.new(0, 14, 0, 28)
         desc.BackgroundTransparency = 1
         desc.Text = config.Description or ""
         desc.TextColor3 = Colors.SubText
         desc.TextSize = 12
         desc.Font = Enum.Font.Gotham
+        desc.TextXAlignment = Enum.TextXAlignment.Left
         desc.Parent = notif
 
-        game:GetService("Debris"):AddItem(notif, 3)
+        local progressBg = Instance.new("Frame")
+        progressBg.Size = UDim2.new(1, 0, 0, 2)
+        progressBg.Position = UDim2.new(0, 0, 1, -2)
+        progressBg.BackgroundColor3 = Colors.Stroke
+        progressBg.BorderSizePixel = 0
+        progressBg.Parent = notif
 
-        Tween(notif, TweenInfo.new(0.3), {Position = UDim2.new(1, -320, 0, 10)})
-        task.wait(2.8)
-        Tween(notif, TweenInfo.new(0.3), {Position = UDim2.new(1, 0, 0, 10)})
-        task.wait(0.3)
-        notif:Destroy()
+        local progress = Instance.new("Frame")
+        progress.Size = UDim2.new(1, 0, 1, 0)
+        progress.BackgroundColor3 = Colors.Accent
+        progress.BorderSizePixel = 0
+        progress.Parent = progressBg
+
+        Tween(notif, TweenInfo.new(0.35, Enum.EasingStyle.Quint), { Position = UDim2.new(1, -280, 0, 16) })
+        Tween(progress, TweenInfo.new(Duration, Enum.EasingStyle.Linear), { Size = UDim2.new(0, 0, 1, 0) })
+
+        task.delay(Duration, function()
+            Tween(notif, TweenInfo.new(0.3, Enum.EasingStyle.Quint), { Position = UDim2.new(1, 20, 0, 16) })
+            task.wait(0.3)
+            notif:Destroy()
+        end)
     end
 
     function Window:Destroy()
