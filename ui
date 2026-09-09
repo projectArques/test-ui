@@ -4,47 +4,31 @@ local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
-local RunService = game:GetService("RunService")
 
-local UIVisible = true
 local TabsData = {}
 local CurrentTab = nil
 local TabButtons = {}
+local PanelOpen = false
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "Sable - UI Diagnostic"
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Name = "Sable"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = CoreGui
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Name = "SmartBar"
+MainFrame.Name = "MainFrame"
 MainFrame.ZIndex = 150
 MainFrame.BorderSizePixel = 0
 MainFrame.BackgroundColor3 = Color3.fromRGB(17, 17, 17)
+MainFrame.BackgroundTransparency = 0.1
 MainFrame.AnchorPoint = Vector2.new(0.5, 1)
 MainFrame.Size = UDim2.new(0, 319, 0, 70)
-MainFrame.Position = UDim2.new(0.5, 0, 1, 160)
-MainFrame.BackgroundTransparency = 1
+MainFrame.Position = UDim2.new(0.5, 0, 1, -90)
 MainFrame.Parent = ScreenGui
-
-local MainScale = Instance.new("UIScale")
-MainScale.Scale = 0.96056
-MainScale.Parent = MainFrame
 
 local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 15)
 MainCorner.Parent = MainFrame
-
-local MainStroke = Instance.new("UIStroke")
-MainStroke.Transparency = 1
-MainStroke.Thickness = 1.2
-MainStroke.Color = Color3.fromRGB(255, 255, 255)
-MainStroke.Parent = MainFrame
-
-local StrokeGradient = Instance.new("UIGradient")
-StrokeGradient.Rotation = 90
-StrokeGradient.Parent = MainStroke
 
 local ShadowCaster = Instance.new("Frame")
 ShadowCaster.Name = "ShadowCaster"
@@ -69,7 +53,6 @@ Brand.Name = "Brand"
 Brand.ZIndex = 150
 Brand.TextSize = 26
 Brand.TextXAlignment = Enum.TextXAlignment.Left
-Brand.TextTransparency = 1
 Brand.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
 Brand.TextColor3 = Color3.fromRGB(255, 255, 255)
 Brand.BackgroundTransparency = 1
@@ -78,10 +61,6 @@ Brand.Size = UDim2.new(0, 66, 0, 30)
 Brand.Text = "sable"
 Brand.Position = UDim2.new(0, 18, 0.5, -1)
 Brand.Parent = MainFrame
-
-local BrandGradient = Instance.new("UIGradient")
-BrandGradient.Rotation = 12
-BrandGradient.Parent = Brand
 
 local TabsFrame = Instance.new("Frame")
 TabsFrame.Name = "Tabs"
@@ -99,46 +78,37 @@ Panel.ZIndex = 140
 Panel.BorderSizePixel = 0
 Panel.BackgroundColor3 = Color3.fromRGB(26, 26, 26)
 Panel.AnchorPoint = Vector2.new(0.5, 1)
-Panel.Size = UDim2.new(0, 10, 0, 8)
-Panel.Position = UDim2.new(0.5, -17, 0, 53)
+Panel.Size = UDim2.new(0, 300, 0, 0)
+Panel.Position = UDim2.new(0.5, 0, 0, 53)
+Panel.ClipsDescendants = true
 Panel.Parent = MainFrame
 
 local PanelCorner = Instance.new("UICorner")
+PanelCorner.CornerRadius = UDim.new(0, 12)
 PanelCorner.Parent = Panel
-
-local PanelStroke = Instance.new("UIStroke")
-PanelStroke.Transparency = 0.8
-PanelStroke.Thickness = 1.2
-PanelStroke.Color = Color3.fromRGB(255, 255, 255)
-PanelStroke.Parent = Panel
-
-local PanelStrokeGradient = Instance.new("UIGradient")
-PanelStrokeGradient.Rotation = 90
-PanelStrokeGradient.Parent = PanelStroke
 
 local PanelContent = Instance.new("ScrollingFrame")
 PanelContent.Name = "Content"
 PanelContent.ZIndex = 141
 PanelContent.BorderSizePixel = 0
-PanelContent.CanvasSize = UDim2.new(0, 0, 0, 731)
+PanelContent.CanvasSize = UDim2.new(0, 0, 0, 0)
 PanelContent.AnchorPoint = Vector2.new(0.5, 0)
-PanelContent.Size = UDim2.new(1, -32, 1, -32)
-PanelContent.ScrollBarImageColor3 = Color3.fromRGB(121, 121, 121)
-PanelContent.Position = UDim2.new(0.5, 0, 0, 16)
+PanelContent.Size = UDim2.new(1, -20, 1, -20)
+PanelContent.Position = UDim2.new(0.5, 0, 0, 10)
 PanelContent.ScrollBarThickness = 3
 PanelContent.BackgroundTransparency = 1
 PanelContent.Parent = Panel
 
 local ContentLayout = Instance.new("UIListLayout")
-ContentLayout.Padding = UDim.new(0, 10)
+ContentLayout.Padding = UDim.new(0, 8)
 ContentLayout.SortOrder = Enum.SortOrder.LayoutOrder
 ContentLayout.Parent = PanelContent
 
 local ContentPadding = Instance.new("UIPadding")
-ContentPadding.PaddingTop = UDim.new(0, 4)
-ContentPadding.PaddingRight = UDim.new(0, 4)
-ContentPadding.PaddingLeft = UDim.new(0, 4)
-ContentPadding.PaddingBottom = UDim.new(0, 4)
+ContentPadding.PaddingTop = UDim.new(0, 6)
+ContentPadding.PaddingRight = UDim.new(0, 6)
+ContentPadding.PaddingLeft = UDim.new(0, 6)
+ContentPadding.PaddingBottom = UDim.new(0, 6)
 ContentPadding.Parent = PanelContent
 
 local KeyHint = Instance.new("Frame")
@@ -166,24 +136,16 @@ local KeyHintCapCorner = Instance.new("UICorner")
 KeyHintCapCorner.CornerRadius = UDim.new(0, 6)
 KeyHintCapCorner.Parent = KeyHintCap
 
-local KeyHintCapStroke = Instance.new("UIStroke")
-KeyHintCapStroke.Transparency = 1
-KeyHintCapStroke.Color = Color3.fromRGB(204, 183, 148)
-KeyHintCapStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-KeyHintCapStroke.Parent = KeyHintCap
-
 local KeyHintKey = Instance.new("TextLabel")
 KeyHintKey.Name = "Key"
 KeyHintKey.ZIndex = 152
 KeyHintKey.BorderSizePixel = 0
 KeyHintKey.TextSize = 11
-KeyHintKey.TextTransparency = 1
 KeyHintKey.FontFace = Font.new("rbxasset://fonts/families/Inconsolata.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
 KeyHintKey.TextColor3 = Color3.fromRGB(204, 183, 148)
 KeyHintKey.BackgroundTransparency = 1
 KeyHintKey.Size = UDim2.new(1, 0, 1, 0)
 KeyHintKey.Text = "RightAlt"
-KeyHintKey.Name = "Key"
 KeyHintKey.Parent = KeyHintCap
 
 local KeyHintCaption = Instance.new("TextLabel")
@@ -193,7 +155,6 @@ KeyHintCaption.ZIndex = 151
 KeyHintCaption.BorderSizePixel = 0
 KeyHintCaption.TextSize = 12
 KeyHintCaption.TextXAlignment = Enum.TextXAlignment.Left
-KeyHintCaption.TextTransparency = 1
 KeyHintCaption.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
 KeyHintCaption.TextColor3 = Color3.fromRGB(155, 148, 134)
 KeyHintCaption.BackgroundTransparency = 1
@@ -214,7 +175,6 @@ Chevron.AnchorPoint = Vector2.new(0.5, 1)
 Chevron.Image = "rbxassetid://3926305904"
 Chevron.ImageRectSize = Vector2.new(36, 36)
 Chevron.Size = UDim2.new(0, 32, 0, 28)
-Chevron.Name = "Chevron"
 Chevron.Rotation = 180
 Chevron.ImageRectOffset = Vector2.new(564, 284)
 Chevron.Position = UDim2.new(0.5, 0, 1, -20)
@@ -232,11 +192,15 @@ local function SwitchTab(tabData)
     end
     
     CurrentTab = tabData
+    task.wait(0.1)
     PanelContent.CanvasSize = UDim2.new(0, 0, 0, ContentLayout.AbsoluteContentSize.Y + 20)
     
-    Panel.Visible = true
-    local height = math.min(400, ContentLayout.AbsoluteContentSize.Y + 40)
-    Panel:TweenSize(UDim2.new(0, 300, 0, height), "Out", "Quad", 0.3, true)
+    if not PanelOpen then
+        PanelOpen = true
+        Panel.Visible = true
+        local height = math.min(350, ContentLayout.AbsoluteContentSize.Y + 40)
+        Panel:TweenSize(UDim2.new(0, 300, 0, height), "Out", "Quad", 0.3, true)
+    end
 end
 
 function Sable:CreateWindow(config)
@@ -253,32 +217,30 @@ function Sable:CreateWindow(config)
     
     KeyHintKey.Text = keybind.Name or "RightAlt"
     
+    local function ToggleUI()
+        PanelOpen = not PanelOpen
+        MainFrame.Visible = true
+        if PanelOpen then
+            Panel.Visible = true
+            local height = math.min(350, ContentLayout.AbsoluteContentSize.Y + 40)
+            Panel:TweenSize(UDim2.new(0, 300, 0, height), "Out", "Quad", 0.3, true)
+            Chevron.Rotation = 0
+        else
+            Panel:TweenSize(UDim2.new(0, 300, 0, 0), "Out", "Quad", 0.2, true)
+            task.wait(0.25)
+            Panel.Visible = false
+            Chevron.Rotation = 180
+        end
+    end
+    
     UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if gameProcessed then return end
         if input.KeyCode == keybind then
-            UIVisible = not UIVisible
-            MainFrame.Visible = UIVisible
-            if UIVisible and CurrentTab then
-                Panel.Visible = true
-                local height = math.min(400, ContentLayout.AbsoluteContentSize.Y + 40)
-                Panel:TweenSize(UDim2.new(0, 300, 0, height), "Out", "Quad", 0.3, true)
-            else
-                Panel.Visible = false
-            end
+            ToggleUI()
         end
     end)
     
-    Chevron.MouseButton1Click:Connect(function()
-        UIVisible = not UIVisible
-        MainFrame.Visible = UIVisible
-        if UIVisible and CurrentTab then
-            Panel.Visible = true
-            local height = math.min(400, ContentLayout.AbsoluteContentSize.Y + 40)
-            Panel:TweenSize(UDim2.new(0, 300, 0, height), "Out", "Quad", 0.3, true)
-        else
-            Panel.Visible = false
-        end
-    end)
+    Chevron.MouseButton1Click:Connect(ToggleUI)
     
     local Window = {}
     local TabIndex = 0
@@ -307,52 +269,6 @@ function Sable:CreateWindow(config)
         corner.CornerRadius = UDim.new(0, 15)
         corner.Parent = frame
         
-        local stroke = Instance.new("UIStroke")
-        stroke.Transparency = 1
-        stroke.Thickness = 1.2
-        stroke.Color = Color3.fromRGB(255, 255, 255)
-        stroke.Parent = frame
-        
-        local strokeGrad = Instance.new("UIGradient")
-        strokeGrad.Rotation = 90
-        strokeGrad.Parent = stroke
-        
-        local grad = Instance.new("UIGradient")
-        grad.Rotation = 90
-        grad.Parent = frame
-        
-        local acrylic1 = Instance.new("ImageLabel")
-        acrylic1.ZIndex = 151
-        acrylic1.BorderSizePixel = 0
-        acrylic1.ScaleType = Enum.ScaleType.Tile
-        acrylic1.ImageTransparency = 1
-        acrylic1.Image = "rbxassetid://9968344105"
-        acrylic1.TileSize = UDim2.new(0, 128, 0, 128)
-        acrylic1.Size = UDim2.new(1, 0, 1, 0)
-        acrylic1.BackgroundTransparency = 1
-        acrylic1.Name = "acrylicthing"
-        acrylic1.Parent = frame
-        
-        local acorner1 = Instance.new("UICorner")
-        acorner1.CornerRadius = UDim.new(0, 12)
-        acorner1.Parent = acrylic1
-        
-        local acrylic2 = Instance.new("ImageLabel")
-        acrylic2.ZIndex = 151
-        acrylic2.BorderSizePixel = 0
-        acrylic2.ScaleType = Enum.ScaleType.Tile
-        acrylic2.ImageTransparency = 1
-        acrylic2.Image = "rbxassetid://9968344227"
-        acrylic2.TileSize = UDim2.new(0, 128, 0, 128)
-        acrylic2.Size = UDim2.new(1, 0, 1, 0)
-        acrylic2.BackgroundTransparency = 1
-        acrylic2.Name = "acrylicthing"
-        acrylic2.Parent = frame
-        
-        local acorner2 = Instance.new("UICorner")
-        acorner2.CornerRadius = UDim.new(0, 12)
-        acorner2.Parent = acrylic2
-        
         local iconLabel = Instance.new("ImageButton")
         iconLabel.AutoButtonColor = false
         iconLabel.BackgroundTransparency = 1
@@ -369,7 +285,6 @@ function Sable:CreateWindow(config)
         label.TextTruncate = Enum.TextTruncate.AtEnd
         label.ZIndex = 151
         label.TextSize = 14
-        label.TextTransparency = 1
         label.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
         label.TextColor3 = Color3.fromRGB(241, 241, 241)
         label.BackgroundTransparency = 1
@@ -381,7 +296,6 @@ function Sable:CreateWindow(config)
         label.Parent = frame
         
         local interact = Instance.new("TextButton")
-        interact.TextTransparency = 1
         interact.AutoButtonColor = false
         interact.ZIndex = 155
         interact.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -397,10 +311,23 @@ function Sable:CreateWindow(config)
         
         interact.MouseButton1Click:Connect(function()
             SwitchTab(tabData)
+            if not PanelOpen then
+                PanelOpen = true
+                Panel.Visible = true
+                local height = math.min(350, ContentLayout.AbsoluteContentSize.Y + 40)
+                Panel:TweenSize(UDim2.new(0, 300, 0, height), "Out", "Quad", 0.3, true)
+                Chevron.Rotation = 0
+            end
         end)
         
         if #TabsData == 1 then
             SwitchTab(tabData)
+            task.wait(0.2)
+            PanelOpen = true
+            Panel.Visible = true
+            local height = math.min(350, ContentLayout.AbsoluteContentSize.Y + 40)
+            Panel:TweenSize(UDim2.new(0, 300, 0, height), "Out", "Quad", 0.3, true)
+            Chevron.Rotation = 0
         end
         
         local Tab = {}
@@ -409,20 +336,15 @@ function Sable:CreateWindow(config)
             local frame = Instance.new("Frame")
             frame.ZIndex = 100
             frame.BorderSizePixel = 0
-            frame.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
+            frame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
             frame.AutomaticSize = Enum.AutomaticSize.Y
             frame.Size = UDim2.new(1, 0, 0, 0)
-            frame.BackgroundTransparency = 0.98
+            frame.BackgroundTransparency = 0.95
             frame.Parent = PanelContent
             
             local corner = Instance.new("UICorner")
-            corner.CornerRadius = UDim.new(0, 12)
+            corner.CornerRadius = UDim.new(0, 10)
             corner.Parent = frame
-            
-            local layout = Instance.new("UIListLayout")
-            layout.HorizontalFlex = Enum.UIFlexAlignment.Fill
-            layout.SortOrder = Enum.SortOrder.LayoutOrder
-            layout.Parent = frame
             
             local padding = Instance.new("UIPadding")
             padding.PaddingRight = UDim.new(0, 10)
@@ -432,9 +354,7 @@ function Sable:CreateWindow(config)
             local row = Instance.new("Frame")
             row.ZIndex = 100
             row.BorderSizePixel = 0
-            row.Size = UDim2.new(1, 0, 0, 42)
-            row.Name = "label_" .. text
-            row.LayoutOrder = 1
+            row.Size = UDim2.new(1, 0, 0, 38)
             row.BackgroundTransparency = 1
             row.Parent = frame
             
@@ -442,47 +362,15 @@ function Sable:CreateWindow(config)
             compName.BorderSizePixel = 0
             compName.TextSize = 13
             compName.TextXAlignment = Enum.TextXAlignment.Left
-            compName.TextTransparency = 0.3
             compName.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-            compName.TextColor3 = Color3.fromRGB(155, 148, 134)
+            compName.TextColor3 = Color3.fromRGB(220, 220, 230)
             compName.BackgroundTransparency = 1
             compName.AnchorPoint = Vector2.new(0, 0.5)
-            compName.Size = UDim2.new(1, -120, 1, 0)
+            compName.Size = UDim2.new(1, -80, 1, 0)
             compName.Text = text
             compName.Name = "Componentname"
             compName.Position = UDim2.new(0, 0, 0.5, 0)
             compName.Parent = row
-            
-            local labelText = Instance.new("TextLabel")
-            labelText.BorderSizePixel = 0
-            labelText.TextSize = 13
-            labelText.TextXAlignment = Enum.TextXAlignment.Right
-            labelText.TextTransparency = 0.3
-            labelText.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-            labelText.TextColor3 = Color3.fromRGB(155, 148, 134)
-            labelText.BackgroundTransparency = 1
-            labelText.AnchorPoint = Vector2.new(1, 0.5)
-            labelText.Size = UDim2.new(0, 0, 1, 0)
-            labelText.Text = ""
-            labelText.AutomaticSize = Enum.AutomaticSize.X
-            labelText.Name = "labeltext"
-            labelText.Position = UDim2.new(1, 0, 0.5, 0)
-            labelText.Parent = row
-            
-            local hover = Instance.new("Frame")
-            hover.ZIndex = 0
-            hover.BorderSizePixel = 0
-            hover.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
-            hover.Size = UDim2.new(1, 20, 1, 0)
-            hover.Position = UDim2.new(0, -10, 0, 0)
-            hover.Name = "RowHover"
-            hover.BackgroundTransparency = 1
-            hover.Parent = row
-            
-            local hoverCorner = Instance.new("UICorner")
-            hoverCorner.Name = "RowHoverCorner"
-            hoverCorner.CornerRadius = UDim.new(0, 12)
-            hoverCorner.Parent = hover
             
             local btn = Instance.new("TextButton")
             btn.Size = UDim2.new(1, 0, 1, 0)
@@ -494,14 +382,6 @@ function Sable:CreateWindow(config)
                 if callback then callback() end
             end)
             
-            btn.MouseEnter:Connect(function()
-                hover.BackgroundTransparency = 0.9
-            end)
-            
-            btn.MouseLeave:Connect(function()
-                hover.BackgroundTransparency = 1
-            end)
-            
             table.insert(tabData.Elements, frame)
             return frame
         end
@@ -510,21 +390,16 @@ function Sable:CreateWindow(config)
             local frame = Instance.new("Frame")
             frame.ZIndex = 98
             frame.BorderSizePixel = 0
-            frame.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
+            frame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
             frame.AutomaticSize = Enum.AutomaticSize.Y
             frame.Size = UDim2.new(1, 0, 0, 0)
             frame.Name = "toggle_" .. text
-            frame.BackgroundTransparency = 0.98
+            frame.BackgroundTransparency = 0.95
             frame.Parent = PanelContent
             
             local corner = Instance.new("UICorner")
-            corner.CornerRadius = UDim.new(0, 12)
+            corner.CornerRadius = UDim.new(0, 10)
             corner.Parent = frame
-            
-            local layout = Instance.new("UIListLayout")
-            layout.HorizontalFlex = Enum.UIFlexAlignment.Fill
-            layout.SortOrder = Enum.SortOrder.LayoutOrder
-            layout.Parent = frame
             
             local padding = Instance.new("UIPadding")
             padding.PaddingRight = UDim.new(0, 10)
@@ -534,9 +409,8 @@ function Sable:CreateWindow(config)
             local row = Instance.new("Frame")
             row.ZIndex = 98
             row.BorderSizePixel = 0
-            row.Size = UDim2.new(1, 0, 0, 58)
+            row.Size = UDim2.new(1, 0, 0, 48)
             row.Name = "toggle_" .. text
-            row.LayoutOrder = 5
             row.BackgroundTransparency = 1
             row.Parent = frame
             
@@ -545,76 +419,50 @@ function Sable:CreateWindow(config)
             compName.BorderSizePixel = 0
             compName.TextSize = 13
             compName.TextXAlignment = Enum.TextXAlignment.Left
-            compName.TextTransparency = 0.05
             compName.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-            compName.TextColor3 = Color3.fromRGB(244, 242, 237)
+            compName.TextColor3 = Color3.fromRGB(220, 220, 230)
             compName.BackgroundTransparency = 1
-            compName.Size = UDim2.new(1, -58, 0, 18)
+            compName.Size = UDim2.new(1, -60, 1, 0)
             compName.Text = text
             compName.Name = "Componentname"
-            compName.Position = UDim2.new(0, 0, 0, 11)
             compName.Parent = row
             
             local switch = Instance.new("Frame")
             switch.BorderSizePixel = 0
-            switch.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
+            switch.BackgroundColor3 = Color3.fromRGB(50, 50, 58)
             switch.AnchorPoint = Vector2.new(1, 0.5)
-            switch.Size = UDim2.new(0, 44, 0, 25)
+            switch.Size = UDim2.new(0, 40, 0, 22)
             switch.Position = UDim2.new(1, 0, 0.5, 0)
             switch.Name = "switchitself"
-            switch.BackgroundTransparency = 0.91
             switch.Parent = row
             
             local swCorner = Instance.new("UICorner")
-            swCorner.CornerRadius = UDim.new(0, 99)
+            swCorner.CornerRadius = UDim.new(1, 0)
             swCorner.Parent = switch
-            
-            local swStroke = Instance.new("UIStroke")
-            swStroke.Color = Color3.fromRGB(169, 149, 112)
-            swStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-            swStroke.Parent = switch
-            
-            local onFill = Instance.new("Frame")
-            onFill.BorderSizePixel = 0
-            onFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            onFill.Size = UDim2.new(1, 0, 1, 0)
-            onFill.Name = "onfill"
-            onFill.Parent = switch
-            
-            local onFillCorner = Instance.new("UICorner")
-            onFillCorner.CornerRadius = UDim.new(0, 99)
-            onFillCorner.Parent = onFill
-            
-            local onFillGrad = Instance.new("UIGradient")
-            onFillGrad.Rotation = 90
-            onFillGrad.Parent = onFill
             
             local knob = Instance.new("Frame")
             knob.ZIndex = 2
             knob.BorderSizePixel = 0
-            knob.BackgroundColor3 = Color3.fromRGB(21, 19, 17)
+            knob.BackgroundColor3 = Color3.fromRGB(200, 200, 210)
             knob.AnchorPoint = Vector2.new(0, 0.5)
-            knob.Size = UDim2.new(0, 19, 0, 19)
-            knob.Position = UDim2.new(0, 22, 0.5, 0)
+            knob.Size = UDim2.new(0, 16, 0, 16)
+            knob.Position = UDim2.new(0, 3, 0.5, 0)
             knob.Name = "knob"
             knob.Parent = switch
             
             local knobCorner = Instance.new("UICorner")
-            knobCorner.CornerRadius = UDim.new(0, 99)
+            knobCorner.CornerRadius = UDim.new(1, 0)
             knobCorner.Parent = knob
             
             local state = default or false
             
             local function updateToggle()
                 if state then
-                    onFill.BackgroundTransparency = 0
-                    knob.Position = UDim2.new(0, 22, 0.5, 0)
-                    knob.BackgroundColor3 = Color3.fromRGB(21, 19, 17)
+                    switch.BackgroundColor3 = Color3.fromRGB(100, 100, 255)
+                    knob.Position = UDim2.new(0, 21, 0.5, 0)
                 else
-                    onFill.BackgroundTransparency = 1
+                    switch.BackgroundColor3 = Color3.fromRGB(50, 50, 58)
                     knob.Position = UDim2.new(0, 3, 0.5, 0)
-                    knob.BackgroundColor3 = Color3.fromRGB(244, 242, 237)
-                    knob.BackgroundTransparency = 0.45
                 end
             end
             updateToggle()
@@ -635,44 +483,6 @@ function Sable:CreateWindow(config)
                 if callback then callback(state) end
             end)
             
-            local hover = Instance.new("Frame")
-            hover.ZIndex = 0
-            hover.BorderSizePixel = 0
-            hover.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
-            hover.Size = UDim2.new(1, 20, 1, 0)
-            hover.Position = UDim2.new(0, -10, 0, 0)
-            hover.Name = "RowHover"
-            hover.BackgroundTransparency = 1
-            hover.Parent = row
-            
-            local hoverCorner = Instance.new("UICorner")
-            hoverCorner.Name = "RowHoverCorner"
-            hoverCorner.CornerRadius = UDim.new(0, 0)
-            hoverCorner.Parent = hover
-            
-            local desc = Instance.new("TextLabel")
-            desc.TextTruncate = Enum.TextTruncate.AtEnd
-            desc.BorderSizePixel = 0
-            desc.TextSize = 11
-            desc.TextXAlignment = Enum.TextXAlignment.Left
-            desc.TextTransparency = 0.3
-            desc.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-            desc.TextColor3 = Color3.fromRGB(155, 148, 134)
-            desc.BackgroundTransparency = 1
-            desc.Size = UDim2.new(1, -58, 0, 15)
-            desc.Text = ""
-            desc.Name = "Componentdescription"
-            desc.Position = UDim2.new(0, 0, 0, 29)
-            desc.Parent = row
-            
-            clicker.MouseEnter:Connect(function()
-                hover.BackgroundTransparency = 0.9
-            end)
-            
-            clicker.MouseLeave:Connect(function()
-                hover.BackgroundTransparency = 1
-            end)
-            
             table.insert(tabData.Elements, frame)
             return frame
         end
@@ -681,21 +491,16 @@ function Sable:CreateWindow(config)
             local frame = Instance.new("Frame")
             frame.ZIndex = 99
             frame.BorderSizePixel = 0
-            frame.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
+            frame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
             frame.AutomaticSize = Enum.AutomaticSize.Y
             frame.Size = UDim2.new(1, 0, 0, 0)
             frame.Name = "slider_" .. text
-            frame.BackgroundTransparency = 0.98
+            frame.BackgroundTransparency = 0.95
             frame.Parent = PanelContent
             
             local corner = Instance.new("UICorner")
-            corner.CornerRadius = UDim.new(0, 12)
+            corner.CornerRadius = UDim.new(0, 10)
             corner.Parent = frame
-            
-            local layout = Instance.new("UIListLayout")
-            layout.HorizontalFlex = Enum.UIFlexAlignment.Fill
-            layout.SortOrder = Enum.SortOrder.LayoutOrder
-            layout.Parent = frame
             
             local padding = Instance.new("UIPadding")
             padding.PaddingRight = UDim.new(0, 10)
@@ -705,9 +510,8 @@ function Sable:CreateWindow(config)
             local row = Instance.new("Frame")
             row.ZIndex = 99
             row.BorderSizePixel = 0
-            row.Size = UDim2.new(1, 0, 0, 58)
+            row.Size = UDim2.new(1, 0, 0, 50)
             row.Name = "slider_" .. text
-            row.LayoutOrder = 3
             row.BackgroundTransparency = 1
             row.Parent = frame
             
@@ -716,48 +520,37 @@ function Sable:CreateWindow(config)
             compName.BorderSizePixel = 0
             compName.TextSize = 13
             compName.TextXAlignment = Enum.TextXAlignment.Left
-            compName.TextTransparency = 0.3
             compName.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-            compName.TextColor3 = Color3.fromRGB(155, 148, 134)
+            compName.TextColor3 = Color3.fromRGB(220, 220, 230)
             compName.BackgroundTransparency = 1
-            compName.Size = UDim2.new(0.38, -10, 0, 18)
+            compName.Size = UDim2.new(0.6, -10, 0.5, 0)
             compName.ClipsDescendants = true
             compName.Text = text
             compName.Name = "Componentname"
-            compName.Position = UDim2.new(0, 0, 0, 11)
+            compName.Position = UDim2.new(0, 0, 0, 0)
             compName.Parent = row
             
-            local right = Instance.new("Frame")
-            right.Active = true
-            right.BorderSizePixel = 0
-            right.AnchorPoint = Vector2.new(1, 0.5)
-            right.Size = UDim2.new(0.62, 0, 0, 16)
-            right.Position = UDim2.new(1, 0, 0.5, 0)
-            right.Name = "right"
-            right.BackgroundTransparency = 1
-            right.Parent = row
-            
-            local sizeConstraint = Instance.new("UISizeConstraint")
-            sizeConstraint.MinSize = Vector2.new(96, 0)
-            sizeConstraint.MaxSize = Vector2.new(200, math.huge)
-            sizeConstraint.Parent = right
-            
-            local rightLayout = Instance.new("UIListLayout")
-            rightLayout.HorizontalFlex = Enum.UIFlexAlignment.Fill
-            rightLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-            rightLayout.SortOrder = Enum.SortOrder.LayoutOrder
-            rightLayout.FillDirection = Enum.FillDirection.Horizontal
-            rightLayout.Parent = right
+            local valueLabel = Instance.new("TextLabel")
+            valueLabel.BorderSizePixel = 0
+            valueLabel.TextSize = 13
+            valueLabel.TextXAlignment = Enum.TextXAlignment.Right
+            valueLabel.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+            valueLabel.TextColor3 = Color3.fromRGB(150, 150, 255)
+            valueLabel.BackgroundTransparency = 1
+            valueLabel.Size = UDim2.new(0.4, -10, 0.5, 0)
+            valueLabel.Position = UDim2.new(0.6, 0, 0, 0)
+            valueLabel.Text = tostring(default or min)
+            valueLabel.Name = "labeltext"
+            valueLabel.Parent = row
             
             local base = Instance.new("Frame")
             base.ZIndex = 5
             base.BorderSizePixel = 0
-            base.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
-            base.Size = UDim2.new(1, -40, 0, 6)
+            base.BackgroundColor3 = Color3.fromRGB(45, 45, 52)
+            base.Size = UDim2.new(1, 0, 0, 4)
+            base.Position = UDim2.new(0, 0, 1, -8)
             base.Name = "Base"
-            base.LayoutOrder = 2
-            base.BackgroundTransparency = 0.95
-            base.Parent = right
+            base.Parent = row
             
             local baseCorner = Instance.new("UICorner")
             baseCorner.CornerRadius = UDim.new(1, 0)
@@ -765,7 +558,7 @@ function Sable:CreateWindow(config)
             
             local active = Instance.new("Frame")
             active.BorderSizePixel = 0
-            active.BackgroundColor3 = Color3.fromRGB(204, 183, 148)
+            active.BackgroundColor3 = Color3.fromRGB(100, 100, 255)
             active.Size = UDim2.new(0.5, 0, 1, 0)
             active.Name = "Active"
             active.Parent = base
@@ -777,67 +570,15 @@ function Sable:CreateWindow(config)
             local knob = Instance.new("Frame")
             knob.BorderSizePixel = 0
             knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            knob.AnchorPoint = Vector2.new(1, 0.5)
-            knob.Size = UDim2.new(0, 20, 0, 16)
-            knob.Position = UDim2.new(1, 0, 0.5, 0)
+            knob.AnchorPoint = Vector2.new(0.5, 0.5)
+            knob.Size = UDim2.new(0, 14, 0, 14)
+            knob.Position = UDim2.new(0.5, 0, 0.5, 0)
             knob.Name = "Knob"
             knob.Parent = active
             
             local knobCorner = Instance.new("UICorner")
+            knobCorner.CornerRadius = UDim.new(1, 0)
             knobCorner.Parent = knob
-            
-            local knobShadow = Instance.new("UIShadow")
-            knobShadow.Parent = knob
-            
-            local valueLabel = Instance.new("TextBox")
-            valueLabel.Name = "labeltext"
-            valueLabel.TextXAlignment = Enum.TextXAlignment.Left
-            valueLabel.BorderSizePixel = 0
-            valueLabel.TextTransparency = 0.3
-            valueLabel.TextSize = 13
-            valueLabel.TextColor3 = Color3.fromRGB(155, 148, 134)
-            valueLabel.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-            valueLabel.ClearTextOnFocus = false
-            valueLabel.Size = UDim2.new(0, 30, 1, 0)
-            valueLabel.Text = tostring(default or min)
-            valueLabel.LayoutOrder = 1
-            valueLabel.BackgroundTransparency = 1
-            valueLabel.Parent = right
-            
-            local valConstraint = Instance.new("UISizeConstraint")
-            valConstraint.MinSize = Vector2.new(30, 0)
-            valConstraint.MaxSize = Vector2.new(30, 9999)
-            valConstraint.Parent = valueLabel
-            
-            local hover = Instance.new("Frame")
-            hover.ZIndex = 0
-            hover.BorderSizePixel = 0
-            hover.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
-            hover.Size = UDim2.new(1, 20, 1, 0)
-            hover.Position = UDim2.new(0, -10, 0, 0)
-            hover.Name = "RowHover"
-            hover.BackgroundTransparency = 1
-            hover.Parent = row
-            
-            local hoverCorner = Instance.new("UICorner")
-            hoverCorner.Name = "RowHoverCorner"
-            hoverCorner.CornerRadius = UDim.new(0, 0)
-            hoverCorner.Parent = hover
-            
-            local desc = Instance.new("TextLabel")
-            desc.TextTruncate = Enum.TextTruncate.AtEnd
-            desc.BorderSizePixel = 0
-            desc.TextSize = 11
-            desc.TextXAlignment = Enum.TextXAlignment.Left
-            desc.TextTransparency = 0.3
-            desc.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-            desc.TextColor3 = Color3.fromRGB(155, 148, 134)
-            desc.BackgroundTransparency = 1
-            desc.Size = UDim2.new(0.38, -10, 0, 15)
-            desc.Text = ""
-            desc.Name = "Componentdescription"
-            desc.Position = UDim2.new(0, 0, 0, 29)
-            desc.Parent = row
             
             local value = default or min
             local dragging = false
@@ -854,7 +595,7 @@ function Sable:CreateWindow(config)
             btn.Size = UDim2.new(1, 0, 1, 0)
             btn.BackgroundTransparency = 1
             btn.Text = ""
-            btn.Parent = right
+            btn.Parent = row
             
             btn.MouseButton1Down:Connect(function()
                 dragging = true
@@ -872,14 +613,6 @@ function Sable:CreateWindow(config)
                 end
             end)
             
-            btn.MouseEnter:Connect(function()
-                hover.BackgroundTransparency = 0.9
-            end)
-            
-            btn.MouseLeave:Connect(function()
-                hover.BackgroundTransparency = 1
-            end)
-            
             table.insert(tabData.Elements, frame)
             return frame
         end
@@ -888,21 +621,16 @@ function Sable:CreateWindow(config)
             local frame = Instance.new("Frame")
             frame.ZIndex = 99
             frame.BorderSizePixel = 0
-            frame.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
+            frame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
             frame.AutomaticSize = Enum.AutomaticSize.Y
             frame.Size = UDim2.new(1, 0, 0, 0)
             frame.Name = "input_" .. text
-            frame.BackgroundTransparency = 0.98
+            frame.BackgroundTransparency = 0.95
             frame.Parent = PanelContent
             
             local corner = Instance.new("UICorner")
-            corner.CornerRadius = UDim.new(0, 12)
+            corner.CornerRadius = UDim.new(0, 10)
             corner.Parent = frame
-            
-            local layout = Instance.new("UIListLayout")
-            layout.HorizontalFlex = Enum.UIFlexAlignment.Fill
-            layout.SortOrder = Enum.SortOrder.LayoutOrder
-            layout.Parent = frame
             
             local padding = Instance.new("UIPadding")
             padding.PaddingRight = UDim.new(0, 10)
@@ -912,9 +640,8 @@ function Sable:CreateWindow(config)
             local row = Instance.new("Frame")
             row.ZIndex = 99
             row.BorderSizePixel = 0
-            row.Size = UDim2.new(1, 0, 0, 58)
+            row.Size = UDim2.new(1, 0, 0, 48)
             row.Name = "input_" .. text
-            row.LayoutOrder = 3
             row.BackgroundTransparency = 1
             row.Parent = frame
             
@@ -922,95 +649,33 @@ function Sable:CreateWindow(config)
             compName.BorderSizePixel = 0
             compName.TextSize = 13
             compName.TextXAlignment = Enum.TextXAlignment.Left
-            compName.TextTransparency = 0.3
             compName.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-            compName.TextColor3 = Color3.fromRGB(155, 148, 134)
+            compName.TextColor3 = Color3.fromRGB(220, 220, 230)
             compName.BackgroundTransparency = 1
-            compName.Size = UDim2.new(1, -120, 0, 18)
+            compName.Size = UDim2.new(0.35, -5, 1, 0)
             compName.Text = text
             compName.Name = "Componentname"
-            compName.Position = UDim2.new(0, 0, 0, 11)
             compName.Parent = row
             
-            local right = Instance.new("Frame")
-            right.BorderSizePixel = 0
-            right.BackgroundColor3 = Color3.fromRGB(8, 8, 7)
-            right.AnchorPoint = Vector2.new(1, 0.5)
-            right.AutomaticSize = Enum.AutomaticSize.X
-            right.Size = UDim2.new(0, 100, 0, 24)
-            right.Position = UDim2.new(1, 0, 0.5, 0)
-            right.Name = "right"
-            right.Parent = row
-            
-            local rightCorner = Instance.new("UICorner")
-            rightCorner.CornerRadius = UDim.new(0, 6)
-            rightCorner.Parent = right
-            
-            local rightShadow = Instance.new("UIShadow")
-            rightShadow.Parent = right
-            
-            local rightLayout = Instance.new("UIListLayout")
-            rightLayout.HorizontalFlex = Enum.UIFlexAlignment.Fill
-            rightLayout.Padding = UDim.new(0, 12)
-            rightLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-            rightLayout.SortOrder = Enum.SortOrder.LayoutOrder
-            rightLayout.FillDirection = Enum.FillDirection.Horizontal
-            rightLayout.Parent = right
-            
-            local rightPadding = Instance.new("UIPadding")
-            rightPadding.PaddingRight = UDim.new(0, 9)
-            rightPadding.PaddingLeft = UDim.new(0, 9)
-            rightPadding.Parent = right
-            
             local box = Instance.new("TextBox")
-            box.Name = "textfieldinput"
-            box.TextXAlignment = Enum.TextXAlignment.Left
-            box.PlaceholderColor3 = Color3.fromRGB(108, 102, 92)
             box.BorderSizePixel = 0
             box.TextSize = 13
-            box.TextColor3 = Color3.fromRGB(155, 148, 134)
+            box.TextXAlignment = Enum.TextXAlignment.Left
+            box.TextColor3 = Color3.fromRGB(220, 220, 230)
             box.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-            box.AutomaticSize = Enum.AutomaticSize.X
+            box.BackgroundColor3 = Color3.fromRGB(40, 40, 48)
             box.ClearTextOnFocus = false
             box.PlaceholderText = placeholder or ""
-            box.Size = UDim2.new(0, 0, 1, 0)
+            box.PlaceholderColor3 = Color3.fromRGB(100, 100, 110)
+            box.Size = UDim2.new(0.65, -5, 1, -10)
+            box.Position = UDim2.new(0.35, 0, 0, 5)
             box.Text = ""
-            box.BackgroundTransparency = 1
-            box.Parent = right
+            box.Name = "textfieldinput"
+            box.Parent = row
             
-            local boxConstraint = Instance.new("UISizeConstraint")
-            boxConstraint.MinSize = Vector2.new(60, 0)
-            boxConstraint.Parent = box
-            
-            local hover = Instance.new("Frame")
-            hover.ZIndex = 0
-            hover.BorderSizePixel = 0
-            hover.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
-            hover.Size = UDim2.new(1, 20, 1, 0)
-            hover.Position = UDim2.new(0, -10, 0, 0)
-            hover.Name = "RowHover"
-            hover.BackgroundTransparency = 1
-            hover.Parent = row
-            
-            local hoverCorner = Instance.new("UICorner")
-            hoverCorner.Name = "RowHoverCorner"
-            hoverCorner.CornerRadius = UDim.new(0, 0)
-            hoverCorner.Parent = hover
-            
-            local desc = Instance.new("TextLabel")
-            desc.TextTruncate = Enum.TextTruncate.AtEnd
-            desc.BorderSizePixel = 0
-            desc.TextSize = 11
-            desc.TextXAlignment = Enum.TextXAlignment.Left
-            desc.TextTransparency = 0.3
-            desc.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-            desc.TextColor3 = Color3.fromRGB(155, 148, 134)
-            desc.BackgroundTransparency = 1
-            desc.Size = UDim2.new(1, -120, 0, 15)
-            desc.Text = ""
-            desc.Name = "Componentdescription"
-            desc.Position = UDim2.new(0, 0, 0, 29)
-            desc.Parent = row
+            local boxCorner = Instance.new("UICorner")
+            boxCorner.CornerRadius = UDim.new(0, 6)
+            boxCorner.Parent = box
             
             box.FocusLost:Connect(function()
                 if callback then callback(box.Text) end
@@ -1024,66 +689,33 @@ function Sable:CreateWindow(config)
             local frame = Instance.new("Frame")
             frame.ZIndex = 100
             frame.BorderSizePixel = 0
-            frame.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
             frame.AutomaticSize = Enum.AutomaticSize.Y
             frame.Size = UDim2.new(1, 0, 0, 0)
             frame.Name = "label_" .. text
-            frame.BackgroundTransparency = 0.98
+            frame.BackgroundTransparency = 1
             frame.Parent = PanelContent
-            
-            local corner = Instance.new("UICorner")
-            corner.CornerRadius = UDim.new(0, 12)
-            corner.Parent = frame
-            
-            local layout = Instance.new("UIListLayout")
-            layout.HorizontalFlex = Enum.UIFlexAlignment.Fill
-            layout.SortOrder = Enum.SortOrder.LayoutOrder
-            layout.Parent = frame
-            
-            local padding = Instance.new("UIPadding")
-            padding.PaddingRight = UDim.new(0, 10)
-            padding.PaddingLeft = UDim.new(0, 10)
-            padding.Parent = frame
             
             local row = Instance.new("Frame")
             row.ZIndex = 100
             row.BorderSizePixel = 0
-            row.Size = UDim2.new(1, 0, 0, 42)
+            row.Size = UDim2.new(1, 0, 0, 28)
             row.Name = "label_" .. text
-            row.LayoutOrder = 1
             row.BackgroundTransparency = 1
             row.Parent = frame
             
             local compName = Instance.new("TextLabel")
             compName.BorderSizePixel = 0
-            compName.TextSize = 13
+            compName.TextSize = 12
             compName.TextXAlignment = Enum.TextXAlignment.Left
-            compName.TextTransparency = 0.3
             compName.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-            compName.TextColor3 = Color3.fromRGB(155, 148, 134)
+            compName.TextColor3 = Color3.fromRGB(150, 150, 160)
             compName.BackgroundTransparency = 1
             compName.AnchorPoint = Vector2.new(0, 0.5)
-            compName.Size = UDim2.new(1, -120, 1, 0)
+            compName.Size = UDim2.new(1, -10, 1, 0)
             compName.Text = text
             compName.Name = "Componentname"
-            compName.Position = UDim2.new(0, 0, 0.5, 0)
+            compName.Position = UDim2.new(0, 5, 0.5, 0)
             compName.Parent = row
-            
-            local labelText = Instance.new("TextLabel")
-            labelText.BorderSizePixel = 0
-            labelText.TextSize = 13
-            labelText.TextXAlignment = Enum.TextXAlignment.Right
-            labelText.TextTransparency = 0.3
-            labelText.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-            labelText.TextColor3 = Color3.fromRGB(155, 148, 134)
-            labelText.BackgroundTransparency = 1
-            labelText.AnchorPoint = Vector2.new(1, 0.5)
-            labelText.Size = UDim2.new(0, 0, 1, 0)
-            labelText.Text = ""
-            labelText.AutomaticSize = Enum.AutomaticSize.X
-            labelText.Name = "labeltext"
-            labelText.Position = UDim2.new(1, 0, 0.5, 0)
-            labelText.Parent = row
             
             table.insert(tabData.Elements, frame)
             return frame
@@ -1093,21 +725,16 @@ function Sable:CreateWindow(config)
             local frame = Instance.new("Frame")
             frame.ZIndex = 99
             frame.BorderSizePixel = 0
-            frame.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
+            frame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
             frame.AutomaticSize = Enum.AutomaticSize.Y
             frame.Size = UDim2.new(1, 0, 0, 0)
             frame.Name = "dropdown_" .. text
-            frame.BackgroundTransparency = 0.98
+            frame.BackgroundTransparency = 0.95
             frame.Parent = PanelContent
             
             local corner = Instance.new("UICorner")
-            corner.CornerRadius = UDim.new(0, 12)
+            corner.CornerRadius = UDim.new(0, 10)
             corner.Parent = frame
-            
-            local layout = Instance.new("UIListLayout")
-            layout.HorizontalFlex = Enum.UIFlexAlignment.Fill
-            layout.SortOrder = Enum.SortOrder.LayoutOrder
-            layout.Parent = frame
             
             local padding = Instance.new("UIPadding")
             padding.PaddingRight = UDim.new(0, 10)
@@ -1117,9 +744,8 @@ function Sable:CreateWindow(config)
             local row = Instance.new("Frame")
             row.ZIndex = 99
             row.BorderSizePixel = 0
-            row.Size = UDim2.new(1, 0, 0, 58)
+            row.Size = UDim2.new(1, 0, 0, 48)
             row.Name = "dropdown_" .. text
-            row.LayoutOrder = 3
             row.BackgroundTransparency = 1
             row.Parent = frame
             
@@ -1127,111 +753,47 @@ function Sable:CreateWindow(config)
             compName.BorderSizePixel = 0
             compName.TextSize = 13
             compName.TextXAlignment = Enum.TextXAlignment.Left
-            compName.TextTransparency = 0.3
             compName.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-            compName.TextColor3 = Color3.fromRGB(155, 148, 134)
+            compName.TextColor3 = Color3.fromRGB(220, 220, 230)
             compName.BackgroundTransparency = 1
-            compName.Size = UDim2.new(1, -120, 0, 18)
+            compName.Size = UDim2.new(0.35, -5, 1, 0)
             compName.Text = text
             compName.Name = "Componentname"
-            compName.Position = UDim2.new(0, 0, 0, 11)
             compName.Parent = row
             
-            local right = Instance.new("TextButton")
-            right.BorderSizePixel = 0
-            right.AutoButtonColor = false
-            right.BackgroundColor3 = Color3.fromRGB(8, 8, 7)
-            right.AnchorPoint = Vector2.new(1, 0.5)
-            right.BackgroundTransparency = 0.45
-            right.Size = UDim2.new(0, 120, 0, 26)
-            right.Text = ""
-            right.Name = "right"
-            right.Position = UDim2.new(1, 0, 0.5, 0)
-            right.Parent = row
+            local dropdownBtn = Instance.new("TextButton")
+            dropdownBtn.BorderSizePixel = 0
+            dropdownBtn.TextSize = 13
+            dropdownBtn.TextXAlignment = Enum.TextXAlignment.Left
+            dropdownBtn.AutoButtonColor = false
+            dropdownBtn.TextColor3 = Color3.fromRGB(220, 220, 230)
+            dropdownBtn.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+            dropdownBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 48)
+            dropdownBtn.Size = UDim2.new(0.65, -5, 1, -10)
+            dropdownBtn.Position = UDim2.new(0.35, 0, 0, 5)
+            dropdownBtn.Text = default or options[1] or ""
+            dropdownBtn.Name = "dropdownbtn"
+            dropdownBtn.Parent = row
             
-            local rightCorner = Instance.new("UICorner")
-            rightCorner.CornerRadius = UDim.new(0, 10)
-            rightCorner.Parent = right
+            local btnCorner = Instance.new("UICorner")
+            btnCorner.CornerRadius = UDim.new(0, 6)
+            btnCorner.Parent = dropdownBtn
             
-            local rightStroke = Instance.new("UIStroke")
-            rightStroke.Color = Color3.fromRGB(37, 34, 30)
-            rightStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-            rightStroke.Parent = right
-            
-            local rightPadding = Instance.new("UIPadding")
-            rightPadding.PaddingRight = UDim.new(0, 2)
-            rightPadding.PaddingLeft = UDim.new(0, 9)
-            rightPadding.Parent = right
-            
-            local valueLabel = Instance.new("TextLabel")
-            valueLabel.TextTruncate = Enum.TextTruncate.AtEnd
-            valueLabel.BorderSizePixel = 0
-            valueLabel.TextSize = 12
-            valueLabel.TextXAlignment = Enum.TextXAlignment.Left
-            valueLabel.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-            valueLabel.TextColor3 = Color3.fromRGB(155, 148, 134)
-            valueLabel.BackgroundTransparency = 1
-            valueLabel.AnchorPoint = Vector2.new(0, 0.5)
-            valueLabel.Size = UDim2.new(1, -32, 1, 0)
-            valueLabel.Text = default or options[1] or ""
-            valueLabel.Name = "combo_box_value"
-            valueLabel.Position = UDim2.new(0, 0, 0.5, 0)
-            valueLabel.Parent = right
-            
-            local arrowBox = Instance.new("Frame")
-            arrowBox.BorderSizePixel = 0
-            arrowBox.AnchorPoint = Vector2.new(1, 0.5)
-            arrowBox.Size = UDim2.new(0, 24, 0, 20)
-            arrowBox.Position = UDim2.new(1, 0, 0.5, 0)
-            arrowBox.Name = "smallarrowbox"
-            arrowBox.BackgroundTransparency = 1
-            arrowBox.Parent = right
-            
-            local arrowIcon = Instance.new("ImageLabel")
-            arrowIcon.BorderSizePixel = 0
-            arrowIcon.ImageColor3 = Color3.fromRGB(155, 148, 134)
-            arrowIcon.AnchorPoint = Vector2.new(0.5, 0.5)
-            arrowIcon.Image = "rbxassetid://138715549597115"
-            arrowIcon.Size = UDim2.new(0, 8, 0, 5)
-            arrowIcon.BackgroundTransparency = 1
-            arrowIcon.Name = "arrowicon"
-            arrowIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
-            arrowIcon.Parent = arrowBox
-            
-            local hover = Instance.new("Frame")
-            hover.ZIndex = 0
-            hover.BorderSizePixel = 0
-            hover.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
-            hover.Size = UDim2.new(1, 20, 1, 0)
-            hover.Position = UDim2.new(0, -10, 0, 0)
-            hover.Name = "RowHover"
-            hover.BackgroundTransparency = 1
-            hover.Parent = row
-            
-            local hoverCorner = Instance.new("UICorner")
-            hoverCorner.Name = "RowHoverCorner"
-            hoverCorner.CornerRadius = UDim.new(0, 0)
-            hoverCorner.Parent = hover
-            
-            local desc = Instance.new("TextLabel")
-            desc.TextTruncate = Enum.TextTruncate.AtEnd
-            desc.BorderSizePixel = 0
-            desc.TextSize = 11
-            desc.TextXAlignment = Enum.TextXAlignment.Left
-            desc.TextTransparency = 0.3
-            desc.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-            desc.TextColor3 = Color3.fromRGB(155, 148, 134)
-            desc.BackgroundTransparency = 1
-            desc.Size = UDim2.new(1, -120, 0, 15)
-            desc.Text = ""
-            desc.Name = "Componentdescription"
-            desc.Position = UDim2.new(0, 0, 0, 29)
-            desc.Parent = row
+            local arrow = Instance.new("ImageLabel")
+            arrow.BorderSizePixel = 0
+            arrow.ImageColor3 = Color3.fromRGB(150, 150, 160)
+            arrow.AnchorPoint = Vector2.new(1, 0.5)
+            arrow.Image = "rbxassetid://138715549597115"
+            arrow.Size = UDim2.new(0, 10, 0, 6)
+            arrow.Position = UDim2.new(1, -10, 0.5, 0)
+            arrow.BackgroundTransparency = 1
+            arrow.Name = "arrow"
+            arrow.Parent = dropdownBtn
             
             local open = false
             local list = nil
             
-            right.MouseButton1Click:Connect(function()
+            dropdownBtn.MouseButton1Click:Connect(function()
                 if open then
                     if list then list:Destroy() end
                     open = false
@@ -1240,113 +802,65 @@ function Sable:CreateWindow(config)
                 
                 open = true
                 list = Instance.new("Frame")
-                list.Visible = true
                 list.ZIndex = 100
                 list.BorderSizePixel = 0
-                list.BackgroundColor3 = Color3.fromRGB(8, 8, 7)
-                list.AnchorPoint = Vector2.new(1, 0)
+                list.BackgroundColor3 = Color3.fromRGB(40, 40, 48)
                 list.ClipsDescendants = true
-                list.Size = UDim2.new(0, 120, 0, 0)
-                list.Position = UDim2.new(1, 0, 0, 45)
+                list.Size = UDim2.new(1, 0, 0, 0)
+                list.Position = UDim2.new(0, 0, 1, 2)
                 list.Name = "DropdownList"
-                list.Parent = row
-                
-                local listScale = Instance.new("UIScale")
-                listScale.Parent = list
+                list.Parent = dropdownBtn
                 
                 local listCorner = Instance.new("UICorner")
                 listCorner.CornerRadius = UDim.new(0, 6)
                 listCorner.Parent = list
                 
-                local listShadow = Instance.new("UIShadow")
-                listShadow.Parent = list
-                
-                local listConstraint = Instance.new("UISizeConstraint")
-                listConstraint.MinSize = Vector2.new(120, 0)
-                listConstraint.MaxSize = Vector2.new(300, 150)
-                listConstraint.Parent = list
-                
-                local holder = Instance.new("ScrollingFrame")
-                holder.ZIndex = 100
-                holder.BorderSizePixel = 0
-                holder.CanvasSize = UDim2.new(0, 0, 0, #options * 28 + 16)
-                holder.Name = "OptionHolder"
-                holder.ScrollBarImageTransparency = 0.45
-                holder.Size = UDim2.new(1, 0, 0, #options * 28 + 16)
-                holder.ScrollBarImageColor3 = Color3.fromRGB(155, 148, 134)
-                holder.ScrollBarThickness = 2
-                holder.BackgroundTransparency = 1
-                holder.Parent = list
-                
-                local holderCorner = Instance.new("UICorner")
-                holderCorner.CornerRadius = UDim.new(0, 6)
-                holderCorner.Parent = holder
-                
-                local holderLayout = Instance.new("UIListLayout")
-                holderLayout.HorizontalFlex = Enum.UIFlexAlignment.Fill
-                holderLayout.Padding = UDim.new(0, 3)
-                holderLayout.SortOrder = Enum.SortOrder.LayoutOrder
-                holderLayout.Parent = holder
-                
-                local holderPadding = Instance.new("UIPadding")
-                holderPadding.PaddingTop = UDim.new(0, 8)
-                holderPadding.PaddingRight = UDim.new(0, 8)
-                holderPadding.PaddingLeft = UDim.new(0, 8)
-                holderPadding.PaddingBottom = UDim.new(0, 8)
-                holderPadding.Parent = holder
+                local listLayout = Instance.new("UIListLayout")
+                listLayout.Padding = UDim.new(0, 2)
+                listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+                listLayout.Parent = list
                 
                 for i, option in pairs(options) do
                     local opt = Instance.new("TextButton")
                     opt.BorderSizePixel = 0
-                    opt.TextXAlignment = Enum.TextXAlignment.Left
                     opt.TextSize = 13
+                    opt.TextXAlignment = Enum.TextXAlignment.Left
                     opt.AutoButtonColor = false
-                    opt.TextColor3 = Color3.fromRGB(244, 242, 237)
-                    opt.BackgroundColor3 = Color3.fromRGB(204, 183, 148)
+                    opt.TextColor3 = Color3.fromRGB(220, 220, 230)
                     opt.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
-                    opt.ZIndex = 101
-                    opt.BackgroundTransparency = 0.8
-                    opt.Size = UDim2.new(1, 0, 0, 28)
+                    opt.BackgroundColor3 = Color3.fromRGB(45, 45, 52)
+                    opt.Size = UDim2.new(1, -10, 0, 28)
+                    opt.Position = UDim2.new(0, 5, 0, 0)
                     opt.Text = option
                     opt.Name = "option_" .. option
-                    opt.Parent = holder
+                    opt.Parent = list
                     
                     local optCorner = Instance.new("UICorner")
                     optCorner.CornerRadius = UDim.new(0, 4)
                     optCorner.Parent = opt
                     
                     local optPadding = Instance.new("UIPadding")
-                    optPadding.PaddingRight = UDim.new(0, 8)
-                    optPadding.PaddingLeft = UDim.new(0, 14)
-                    optPadding.PaddingBottom = UDim.new(0, 1)
+                    optPadding.PaddingLeft = UDim.new(0, 10)
                     optPadding.Parent = opt
                     
-                    if option == valueLabel.Text then
-                        local dot = Instance.new("Frame")
-                        dot.ZIndex = 102
-                        dot.BorderSizePixel = 0
-                        dot.BackgroundColor3 = Color3.fromRGB(204, 183, 148)
-                        dot.AnchorPoint = Vector2.new(0.5, 0.5)
-                        dot.Size = UDim2.new(0, 6, 0, 6)
-                        dot.Position = UDim2.new(0, -8, 0.5, 0)
-                        dot.Name = "selecteddot"
-                        dot.Parent = opt
-                        
-                        local dotCorner = Instance.new("UICorner")
-                        dotCorner.CornerRadius = UDim.new(1, 0)
-                        dotCorner.Parent = dot
-                    end
-                    
                     opt.MouseButton1Click:Connect(function()
-                        valueLabel.Text = option
+                        dropdownBtn.Text = option
                         if callback then callback(option) end
                         list:Destroy()
                         open = false
                     end)
+                    
+                    opt.MouseEnter:Connect(function()
+                        opt.BackgroundColor3 = Color3.fromRGB(55, 55, 62)
+                    end)
+                    
+                    opt.MouseLeave:Connect(function()
+                        opt.BackgroundColor3 = Color3.fromRGB(45, 45, 52)
+                    end)
                 end
                 
-                list.Size = UDim2.new(0, 120, 0, #options * 28 + 32)
-                holder.Size = UDim2.new(1, 0, 0, #options * 28 + 16)
+                local totalHeight = #options * 30 + 4
+                list.Size = UDim2.new(1, 0, 0, totalHeight)
             end)
             
             table.insert(tabData.Elements, frame)
@@ -1397,7 +911,7 @@ function Sable:CreateWindow(config)
         end
         
         function Window:Destroy()
-            MainFrame:Destroy()
+            ScreenGui:Destroy()
         end
         
         return Tab
