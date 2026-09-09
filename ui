@@ -1,0 +1,1404 @@
+local Sable = {}
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local RunService = game:GetService("RunService")
+
+local UIVisible = true
+local TabsData = {}
+local CurrentTab = nil
+local TabButtons = {}
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "Sable - UI Diagnostic"
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = CoreGui
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "SmartBar"
+MainFrame.ZIndex = 150
+MainFrame.BorderSizePixel = 0
+MainFrame.BackgroundColor3 = Color3.fromRGB(17, 17, 17)
+MainFrame.AnchorPoint = Vector2.new(0.5, 1)
+MainFrame.Size = UDim2.new(0, 319, 0, 70)
+MainFrame.Position = UDim2.new(0.5, 0, 1, 160)
+MainFrame.BackgroundTransparency = 1
+MainFrame.Parent = ScreenGui
+
+local MainScale = Instance.new("UIScale")
+MainScale.Scale = 0.96056
+MainScale.Parent = MainFrame
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 15)
+MainCorner.Parent = MainFrame
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Transparency = 1
+MainStroke.Thickness = 1.2
+MainStroke.Color = Color3.fromRGB(255, 255, 255)
+MainStroke.Parent = MainFrame
+
+local StrokeGradient = Instance.new("UIGradient")
+StrokeGradient.Rotation = 90
+StrokeGradient.Parent = MainStroke
+
+local ShadowCaster = Instance.new("Frame")
+ShadowCaster.Name = "ShadowCaster"
+ShadowCaster.ZIndex = 149
+ShadowCaster.BorderSizePixel = 0
+ShadowCaster.BackgroundColor3 = Color3.fromRGB(17, 17, 17)
+ShadowCaster.AnchorPoint = Vector2.new(0.5, 0.5)
+ShadowCaster.Size = UDim2.new(1, -10, 1, -10)
+ShadowCaster.Position = UDim2.new(0.5, 0, 0.5, 0)
+ShadowCaster.BackgroundTransparency = 1
+ShadowCaster.Parent = MainFrame
+
+local ShadowCorner = Instance.new("UICorner")
+ShadowCorner.CornerRadius = UDim.new(1, 0)
+ShadowCorner.Parent = ShadowCaster
+
+local UIShadow = Instance.new("UIShadow")
+UIShadow.Parent = ShadowCaster
+
+local Brand = Instance.new("TextLabel")
+Brand.Name = "Brand"
+Brand.ZIndex = 150
+Brand.TextSize = 26
+Brand.TextXAlignment = Enum.TextXAlignment.Left
+Brand.TextTransparency = 1
+Brand.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+Brand.TextColor3 = Color3.fromRGB(255, 255, 255)
+Brand.BackgroundTransparency = 1
+Brand.AnchorPoint = Vector2.new(0, 0.5)
+Brand.Size = UDim2.new(0, 66, 0, 30)
+Brand.Text = "sable"
+Brand.Position = UDim2.new(0, 18, 0.5, -1)
+Brand.Parent = MainFrame
+
+local BrandGradient = Instance.new("UIGradient")
+BrandGradient.Rotation = 12
+BrandGradient.Parent = Brand
+
+local TabsFrame = Instance.new("Frame")
+TabsFrame.Name = "Tabs"
+TabsFrame.ZIndex = 150
+TabsFrame.AnchorPoint = Vector2.new(0, 0.5)
+TabsFrame.Size = UDim2.new(1, 0, 1, 0)
+TabsFrame.Position = UDim2.new(0, 0, 0.5, 0)
+TabsFrame.BackgroundTransparency = 1
+TabsFrame.Parent = MainFrame
+
+local Panel = Instance.new("Frame")
+Panel.Name = "Panel"
+Panel.Visible = false
+Panel.ZIndex = 140
+Panel.BorderSizePixel = 0
+Panel.BackgroundColor3 = Color3.fromRGB(26, 26, 26)
+Panel.AnchorPoint = Vector2.new(0.5, 1)
+Panel.Size = UDim2.new(0, 10, 0, 8)
+Panel.Position = UDim2.new(0.5, -17, 0, 53)
+Panel.Parent = MainFrame
+
+local PanelCorner = Instance.new("UICorner")
+PanelCorner.Parent = Panel
+
+local PanelStroke = Instance.new("UIStroke")
+PanelStroke.Transparency = 0.8
+PanelStroke.Thickness = 1.2
+PanelStroke.Color = Color3.fromRGB(255, 255, 255)
+PanelStroke.Parent = Panel
+
+local PanelStrokeGradient = Instance.new("UIGradient")
+PanelStrokeGradient.Rotation = 90
+PanelStrokeGradient.Parent = PanelStroke
+
+local PanelContent = Instance.new("ScrollingFrame")
+PanelContent.Name = "Content"
+PanelContent.ZIndex = 141
+PanelContent.BorderSizePixel = 0
+PanelContent.CanvasSize = UDim2.new(0, 0, 0, 731)
+PanelContent.AnchorPoint = Vector2.new(0.5, 0)
+PanelContent.Size = UDim2.new(1, -32, 1, -32)
+PanelContent.ScrollBarImageColor3 = Color3.fromRGB(121, 121, 121)
+PanelContent.Position = UDim2.new(0.5, 0, 0, 16)
+PanelContent.ScrollBarThickness = 3
+PanelContent.BackgroundTransparency = 1
+PanelContent.Parent = Panel
+
+local ContentLayout = Instance.new("UIListLayout")
+ContentLayout.Padding = UDim.new(0, 10)
+ContentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+ContentLayout.Parent = PanelContent
+
+local ContentPadding = Instance.new("UIPadding")
+ContentPadding.PaddingTop = UDim.new(0, 4)
+ContentPadding.PaddingRight = UDim.new(0, 4)
+ContentPadding.PaddingLeft = UDim.new(0, 4)
+ContentPadding.PaddingBottom = UDim.new(0, 4)
+ContentPadding.Parent = PanelContent
+
+local KeyHint = Instance.new("Frame")
+KeyHint.Name = "KeyHint"
+KeyHint.ZIndex = 150
+KeyHint.BorderSizePixel = 0
+KeyHint.AnchorPoint = Vector2.new(0, 0.5)
+KeyHint.Size = UDim2.new(0, 93, 0, 22)
+KeyHint.Position = UDim2.new(0, 208, 0.5, 0)
+KeyHint.BackgroundTransparency = 1
+KeyHint.Parent = MainFrame
+
+local KeyHintCap = Instance.new("Frame")
+KeyHintCap.Name = "Cap"
+KeyHintCap.ZIndex = 151
+KeyHintCap.BorderSizePixel = 0
+KeyHintCap.BackgroundColor3 = Color3.fromRGB(27, 26, 24)
+KeyHintCap.AnchorPoint = Vector2.new(0, 0.5)
+KeyHintCap.Size = UDim2.new(0, 42, 0, 22)
+KeyHintCap.Position = UDim2.new(0, 0, 0.5, 0)
+KeyHintCap.BackgroundTransparency = 1
+KeyHintCap.Parent = KeyHint
+
+local KeyHintCapCorner = Instance.new("UICorner")
+KeyHintCapCorner.CornerRadius = UDim.new(0, 6)
+KeyHintCapCorner.Parent = KeyHintCap
+
+local KeyHintCapStroke = Instance.new("UIStroke")
+KeyHintCapStroke.Transparency = 1
+KeyHintCapStroke.Color = Color3.fromRGB(204, 183, 148)
+KeyHintCapStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+KeyHintCapStroke.Parent = KeyHintCap
+
+local KeyHintKey = Instance.new("TextLabel")
+KeyHintKey.Name = "Key"
+KeyHintKey.ZIndex = 152
+KeyHintKey.BorderSizePixel = 0
+KeyHintKey.TextSize = 11
+KeyHintKey.TextTransparency = 1
+KeyHintKey.FontFace = Font.new("rbxasset://fonts/families/Inconsolata.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+KeyHintKey.TextColor3 = Color3.fromRGB(204, 183, 148)
+KeyHintKey.BackgroundTransparency = 1
+KeyHintKey.Size = UDim2.new(1, 0, 1, 0)
+KeyHintKey.Text = "RAlt"
+KeyHintKey.Name = "Key"
+KeyHintKey.Parent = KeyHintCap
+
+local KeyHintCaption = Instance.new("TextLabel")
+KeyHintCaption.Name = "Caption"
+KeyHintCaption.TextTruncate = Enum.TextTruncate.AtEnd
+KeyHintCaption.ZIndex = 151
+KeyHintCaption.BorderSizePixel = 0
+KeyHintCaption.TextSize = 12
+KeyHintCaption.TextXAlignment = Enum.TextXAlignment.Left
+KeyHintCaption.TextTransparency = 1
+KeyHintCaption.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+KeyHintCaption.TextColor3 = Color3.fromRGB(155, 148, 134)
+KeyHintCaption.BackgroundTransparency = 1
+KeyHintCaption.AnchorPoint = Vector2.new(0, 0.5)
+KeyHintCaption.Size = UDim2.new(0, 44, 1, 0)
+KeyHintCaption.Text = "to open"
+KeyHintCaption.Position = UDim2.new(0, 49, 0.5, 0)
+KeyHintCaption.Parent = KeyHint
+
+local Chevron = Instance.new("ImageButton")
+Chevron.Name = "Chevron"
+Chevron.BorderSizePixel = 0
+Chevron.AutoButtonColor = false
+Chevron.BackgroundTransparency = 1
+Chevron.ImageColor3 = Color3.fromRGB(244, 242, 237)
+Chevron.ZIndex = 200
+Chevron.AnchorPoint = Vector2.new(0.5, 1)
+Chevron.Image = "rbxassetid://3926305904"
+Chevron.ImageRectSize = Vector2.new(36, 36)
+Chevron.Size = UDim2.new(0, 32, 0, 28)
+Chevron.Name = "Chevron"
+Chevron.Rotation = 180
+Chevron.ImageRectOffset = Vector2.new(564, 284)
+Chevron.Position = UDim2.new(0.5, 0, 1, -20)
+Chevron.Parent = ScreenGui
+
+local function CreateTabButton(name, icon, tabData)
+    local frame = Instance.new("Frame")
+    frame.ZIndex = 150
+    frame.BorderSizePixel = 0
+    frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    frame.AnchorPoint = Vector2.new(0, 0.5)
+    frame.Size = UDim2.new(0, 44, 0, 36)
+    frame.Position = UDim2.new(0, 96 + (#TabButtons * 54), 0.5, 0)
+    frame.Name = "tab_" .. name
+    frame.BackgroundTransparency = 1
+    frame.Parent = TabsFrame
+    frame.TabData = tabData
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 15)
+    corner.Parent = frame
+    
+    local stroke = Instance.new("UIStroke")
+    stroke.Transparency = 1
+    stroke.Thickness = 1.2
+    stroke.Color = Color3.fromRGB(255, 255, 255)
+    stroke.Parent = frame
+    
+    local strokeGrad = Instance.new("UIGradient")
+    strokeGrad.Rotation = 90
+    strokeGrad.Parent = stroke
+    
+    local grad = Instance.new("UIGradient")
+    grad.Rotation = 90
+    grad.Parent = frame
+    
+    local acrylic1 = Instance.new("ImageLabel")
+    acrylic1.ZIndex = 151
+    acrylic1.BorderSizePixel = 0
+    acrylic1.ScaleType = Enum.ScaleType.Tile
+    acrylic1.ImageTransparency = 1
+    acrylic1.Image = "rbxassetid://9968344105"
+    acrylic1.TileSize = UDim2.new(0, 128, 0, 128)
+    acrylic1.Size = UDim2.new(1, 0, 1, 0)
+    acrylic1.BackgroundTransparency = 1
+    acrylic1.Name = "acrylicthing"
+    acrylic1.Parent = frame
+    
+    local acorner1 = Instance.new("UICorner")
+    acorner1.CornerRadius = UDim.new(0, 12)
+    acorner1.Parent = acrylic1
+    
+    local acrylic2 = Instance.new("ImageLabel")
+    acrylic2.ZIndex = 151
+    acrylic2.BorderSizePixel = 0
+    acrylic2.ScaleType = Enum.ScaleType.Tile
+    acrylic2.ImageTransparency = 1
+    acrylic2.Image = "rbxassetid://9968344227"
+    acrylic2.TileSize = UDim2.new(0, 128, 0, 128)
+    acrylic2.Size = UDim2.new(1, 0, 1, 0)
+    acrylic2.BackgroundTransparency = 1
+    acrylic2.Name = "acrylicthing"
+    acrylic2.Parent = frame
+    
+    local acorner2 = Instance.new("UICorner")
+    acorner2.CornerRadius = UDim.new(0, 12)
+    acorner2.Parent = acrylic2
+    
+    local icon = Instance.new("ImageButton")
+    icon.AutoButtonColor = false
+    icon.BackgroundTransparency = 1
+    icon.ImageColor3 = Color3.fromRGB(241, 241, 241)
+    icon.ZIndex = 151
+    icon.AnchorPoint = Vector2.new(0.5, 0.5)
+    icon.Image = icon or "rbxassetid://0"
+    icon.Size = UDim2.new(0, 22, 0, 22)
+    icon.Name = "Icon"
+    icon.Position = UDim2.new(0.5, 0, 0.5, 0)
+    icon.Parent = frame
+    
+    local label = Instance.new("TextLabel")
+    label.TextTruncate = Enum.TextTruncate.AtEnd
+    label.ZIndex = 151
+    label.TextSize = 14
+    label.TextTransparency = 1
+    label.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+    label.TextColor3 = Color3.fromRGB(241, 241, 241)
+    label.BackgroundTransparency = 1
+    label.AnchorPoint = Vector2.new(0.5, 0.5)
+    label.Size = UDim2.new(0, 74, 0, 19)
+    label.Text = name
+    label.Name = "Label"
+    label.Position = UDim2.new(0.5, 0, 0.5, 0)
+    label.Parent = frame
+    
+    local interact = Instance.new("TextButton")
+    interact.TextTransparency = 1
+    interact.AutoButtonColor = false
+    interact.ZIndex = 155
+    interact.AnchorPoint = Vector2.new(0.5, 0.5)
+    interact.BackgroundTransparency = 1
+    interact.Size = UDim2.new(1, 0, 1, 0)
+    interact.Text = ""
+    interact.Name = "Interact"
+    interact.Position = UDim2.new(0.5, 0, 0.5, 0)
+    interact.Parent = frame
+    
+    table.insert(TabButtons, frame)
+    
+    interact.MouseButton1Click:Connect(function()
+        Sable:SwitchTab(tabData)
+    end)
+    
+    return frame
+end
+
+function Sable:SwitchTab(tabData)
+    for _, child in pairs(PanelContent:GetChildren()) do
+        if child:IsA("Frame") and child ~= ContentLayout and child ~= ContentPadding then
+            child:Destroy()
+        end
+    end
+    
+    for _, element in pairs(tabData.Elements or {}) do
+        element.Parent = PanelContent
+    end
+    
+    CurrentTab = tabData
+    PanelContent.CanvasSize = UDim2.new(0, 0, 0, ContentLayout.AbsoluteContentSize.Y + 20)
+    
+    Panel.Visible = true
+    Panel:TweenSize(UDim2.new(0, 300, 0, math.min(400, ContentLayout.AbsoluteContentSize.Y + 40)), "Out", "Quad", 0.3, true)
+end
+
+function Sable:CreateWindow(config)
+    config = config or {}
+    
+    if config.Name then
+        Brand.Text = config.Name
+    end
+    
+    local keybind = config.Keybind or "RAlt"
+    if type(keybind) == "string" then
+        keybind = Enum.KeyCode[keybind] or Enum.KeyCode.RightAlt
+    end
+    
+    KeyHintKey.Text = keybind.Name or "RAlt"
+    
+    UserInputService.InputBegan:Connect(function(input, gameProcessed)
+        if gameProcessed then return end
+        if input.KeyCode == keybind then
+            UIVisible = not UIVisible
+            MainFrame.Visible = UIVisible
+            if not UIVisible then
+                Panel.Visible = false
+            end
+        end
+    end)
+    
+    Chevron.MouseButton1Click:Connect(function()
+        UIVisible = not UIVisible
+        MainFrame.Visible = UIVisible
+        if not UIVisible then
+            Panel.Visible = false
+        end
+    end)
+    
+    local Window = {}
+    
+    function Window:CreateTab(name, icon)
+        local tabData = {
+            Name = name,
+            Icon = icon or "rbxassetid://0",
+            Elements = {}
+        }
+        
+        CreateTabButton(name, icon, tabData)
+        table.insert(TabsData, tabData)
+        
+        if #TabsData == 1 then
+            Sable:SwitchTab(tabData)
+        end
+        
+        local Tab = {}
+        
+        function Tab:CreateButton(text, callback)
+            local frame = Instance.new("Frame")
+            frame.ZIndex = 100
+            frame.BorderSizePixel = 0
+            frame.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
+            frame.AutomaticSize = Enum.AutomaticSize.Y
+            frame.Size = UDim2.new(1, 0, 0, 0)
+            frame.BackgroundTransparency = 0.98
+            frame.Parent = PanelContent
+            
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, 12)
+            corner.Parent = frame
+            
+            local layout = Instance.new("UIListLayout")
+            layout.HorizontalFlex = Enum.UIFlexAlignment.Fill
+            layout.SortOrder = Enum.SortOrder.LayoutOrder
+            layout.Parent = frame
+            
+            local padding = Instance.new("UIPadding")
+            padding.PaddingRight = UDim.new(0, 10)
+            padding.PaddingLeft = UDim.new(0, 10)
+            padding.Parent = frame
+            
+            local row = Instance.new("Frame")
+            row.ZIndex = 100
+            row.BorderSizePixel = 0
+            row.Size = UDim2.new(1, 0, 0, 42)
+            row.Name = "label_" .. text
+            row.LayoutOrder = 1
+            row.BackgroundTransparency = 1
+            row.Parent = frame
+            
+            local compName = Instance.new("TextLabel")
+            compName.BorderSizePixel = 0
+            compName.TextSize = 13
+            compName.TextXAlignment = Enum.TextXAlignment.Left
+            compName.TextTransparency = 0.3
+            compName.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+            compName.TextColor3 = Color3.fromRGB(155, 148, 134)
+            compName.BackgroundTransparency = 1
+            compName.AnchorPoint = Vector2.new(0, 0.5)
+            compName.Size = UDim2.new(1, -120, 1, 0)
+            compName.Text = text
+            compName.Name = "Componentname"
+            compName.Position = UDim2.new(0, 0, 0.5, 0)
+            compName.Parent = row
+            
+            local labelText = Instance.new("TextLabel")
+            labelText.BorderSizePixel = 0
+            labelText.TextSize = 13
+            labelText.TextXAlignment = Enum.TextXAlignment.Right
+            labelText.TextTransparency = 0.3
+            labelText.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+            labelText.TextColor3 = Color3.fromRGB(155, 148, 134)
+            labelText.BackgroundTransparency = 1
+            labelText.AnchorPoint = Vector2.new(1, 0.5)
+            labelText.Size = UDim2.new(0, 0, 1, 0)
+            labelText.Text = ""
+            labelText.AutomaticSize = Enum.AutomaticSize.X
+            labelText.Name = "labeltext"
+            labelText.Position = UDim2.new(1, 0, 0.5, 0)
+            labelText.Parent = row
+            
+            local hover = Instance.new("Frame")
+            hover.ZIndex = 0
+            hover.BorderSizePixel = 0
+            hover.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
+            hover.Size = UDim2.new(1, 20, 1, 0)
+            hover.Position = UDim2.new(0, -10, 0, 0)
+            hover.Name = "RowHover"
+            hover.BackgroundTransparency = 1
+            hover.Parent = row
+            
+            local hoverCorner = Instance.new("UICorner")
+            hoverCorner.Name = "RowHoverCorner"
+            hoverCorner.CornerRadius = UDim.new(0, 12)
+            hoverCorner.Parent = hover
+            
+            local btn = Instance.new("TextButton")
+            btn.Size = UDim2.new(1, 0, 1, 0)
+            btn.BackgroundTransparency = 1
+            btn.Text = ""
+            btn.Parent = row
+            
+            btn.MouseButton1Click:Connect(function()
+                if callback then callback() end
+            end)
+            
+            btn.MouseEnter:Connect(function()
+                hover.BackgroundTransparency = 0.9
+            end)
+            
+            btn.MouseLeave:Connect(function()
+                hover.BackgroundTransparency = 1
+            end)
+            
+            table.insert(tabData.Elements, frame)
+            return frame
+        end
+        
+        function Tab:CreateToggle(text, default, callback)
+            local frame = Instance.new("Frame")
+            frame.ZIndex = 98
+            frame.BorderSizePixel = 0
+            frame.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
+            frame.AutomaticSize = Enum.AutomaticSize.Y
+            frame.Size = UDim2.new(1, 0, 0, 0)
+            frame.Name = "toggle_" .. text
+            frame.BackgroundTransparency = 0.98
+            frame.Parent = PanelContent
+            
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, 12)
+            corner.Parent = frame
+            
+            local layout = Instance.new("UIListLayout")
+            layout.HorizontalFlex = Enum.UIFlexAlignment.Fill
+            layout.SortOrder = Enum.SortOrder.LayoutOrder
+            layout.Parent = frame
+            
+            local padding = Instance.new("UIPadding")
+            padding.PaddingRight = UDim.new(0, 10)
+            padding.PaddingLeft = UDim.new(0, 10)
+            padding.Parent = frame
+            
+            local row = Instance.new("Frame")
+            row.ZIndex = 98
+            row.BorderSizePixel = 0
+            row.Size = UDim2.new(1, 0, 0, 58)
+            row.Name = "toggle_" .. text
+            row.LayoutOrder = 5
+            row.BackgroundTransparency = 1
+            row.Parent = frame
+            
+            local compName = Instance.new("TextLabel")
+            compName.TextTruncate = Enum.TextTruncate.AtEnd
+            compName.BorderSizePixel = 0
+            compName.TextSize = 13
+            compName.TextXAlignment = Enum.TextXAlignment.Left
+            compName.TextTransparency = 0.05
+            compName.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+            compName.TextColor3 = Color3.fromRGB(244, 242, 237)
+            compName.BackgroundTransparency = 1
+            compName.Size = UDim2.new(1, -58, 0, 18)
+            compName.Text = text
+            compName.Name = "Componentname"
+            compName.Position = UDim2.new(0, 0, 0, 11)
+            compName.Parent = row
+            
+            local switch = Instance.new("Frame")
+            switch.BorderSizePixel = 0
+            switch.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
+            switch.AnchorPoint = Vector2.new(1, 0.5)
+            switch.Size = UDim2.new(0, 44, 0, 25)
+            switch.Position = UDim2.new(1, 0, 0.5, 0)
+            switch.Name = "switchitself"
+            switch.BackgroundTransparency = 0.91
+            switch.Parent = row
+            
+            local swCorner = Instance.new("UICorner")
+            swCorner.CornerRadius = UDim.new(0, 99)
+            swCorner.Parent = switch
+            
+            local swStroke = Instance.new("UIStroke")
+            swStroke.Color = Color3.fromRGB(169, 149, 112)
+            swStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+            swStroke.Parent = switch
+            
+            local onFill = Instance.new("Frame")
+            onFill.BorderSizePixel = 0
+            onFill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            onFill.Size = UDim2.new(1, 0, 1, 0)
+            onFill.Name = "onfill"
+            onFill.Parent = switch
+            
+            local onFillCorner = Instance.new("UICorner")
+            onFillCorner.CornerRadius = UDim.new(0, 99)
+            onFillCorner.Parent = onFill
+            
+            local onFillGrad = Instance.new("UIGradient")
+            onFillGrad.Rotation = 90
+            onFillGrad.Parent = onFill
+            
+            local knob = Instance.new("Frame")
+            knob.ZIndex = 2
+            knob.BorderSizePixel = 0
+            knob.BackgroundColor3 = Color3.fromRGB(21, 19, 17)
+            knob.AnchorPoint = Vector2.new(0, 0.5)
+            knob.Size = UDim2.new(0, 19, 0, 19)
+            knob.Position = UDim2.new(0, 22, 0.5, 0)
+            knob.Name = "knob"
+            knob.Parent = switch
+            
+            local knobCorner = Instance.new("UICorner")
+            knobCorner.CornerRadius = UDim.new(0, 99)
+            knobCorner.Parent = knob
+            
+            local state = default or false
+            
+            local function updateToggle()
+                if state then
+                    onFill.BackgroundTransparency = 0
+                    knob.Position = UDim2.new(0, 22, 0.5, 0)
+                    knob.BackgroundColor3 = Color3.fromRGB(21, 19, 17)
+                else
+                    onFill.BackgroundTransparency = 1
+                    knob.Position = UDim2.new(0, 3, 0.5, 0)
+                    knob.BackgroundColor3 = Color3.fromRGB(244, 242, 237)
+                    knob.BackgroundTransparency = 0.45
+                end
+            end
+            updateToggle()
+            
+            local clicker = Instance.new("TextButton")
+            clicker.BorderSizePixel = 0
+            clicker.AutoButtonColor = false
+            clicker.ZIndex = 10
+            clicker.BackgroundTransparency = 1
+            clicker.Size = UDim2.new(1, 0, 1, 0)
+            clicker.Text = ""
+            clicker.Name = "ClickDetector"
+            clicker.Parent = row
+            
+            clicker.MouseButton1Click:Connect(function()
+                state = not state
+                updateToggle()
+                if callback then callback(state) end
+            end)
+            
+            local hover = Instance.new("Frame")
+            hover.ZIndex = 0
+            hover.BorderSizePixel = 0
+            hover.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
+            hover.Size = UDim2.new(1, 20, 1, 0)
+            hover.Position = UDim2.new(0, -10, 0, 0)
+            hover.Name = "RowHover"
+            hover.BackgroundTransparency = 1
+            hover.Parent = row
+            
+            local hoverCorner = Instance.new("UICorner")
+            hoverCorner.Name = "RowHoverCorner"
+            hoverCorner.CornerRadius = UDim.new(0, 0)
+            hoverCorner.Parent = hover
+            
+            local desc = Instance.new("TextLabel")
+            desc.TextTruncate = Enum.TextTruncate.AtEnd
+            desc.BorderSizePixel = 0
+            desc.TextSize = 11
+            desc.TextXAlignment = Enum.TextXAlignment.Left
+            desc.TextTransparency = 0.3
+            desc.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+            desc.TextColor3 = Color3.fromRGB(155, 148, 134)
+            desc.BackgroundTransparency = 1
+            desc.Size = UDim2.new(1, -58, 0, 15)
+            desc.Text = ""
+            desc.Name = "Componentdescription"
+            desc.Position = UDim2.new(0, 0, 0, 29)
+            desc.Parent = row
+            
+            clicker.MouseEnter:Connect(function()
+                hover.BackgroundTransparency = 0.9
+            end)
+            
+            clicker.MouseLeave:Connect(function()
+                hover.BackgroundTransparency = 1
+            end)
+            
+            table.insert(tabData.Elements, frame)
+            return frame
+        end
+        
+        function Tab:CreateSlider(text, min, max, default, callback)
+            local frame = Instance.new("Frame")
+            frame.ZIndex = 99
+            frame.BorderSizePixel = 0
+            frame.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
+            frame.AutomaticSize = Enum.AutomaticSize.Y
+            frame.Size = UDim2.new(1, 0, 0, 0)
+            frame.Name = "slider_" .. text
+            frame.BackgroundTransparency = 0.98
+            frame.Parent = PanelContent
+            
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, 12)
+            corner.Parent = frame
+            
+            local layout = Instance.new("UIListLayout")
+            layout.HorizontalFlex = Enum.UIFlexAlignment.Fill
+            layout.SortOrder = Enum.SortOrder.LayoutOrder
+            layout.Parent = frame
+            
+            local padding = Instance.new("UIPadding")
+            padding.PaddingRight = UDim.new(0, 10)
+            padding.PaddingLeft = UDim.new(0, 10)
+            padding.Parent = frame
+            
+            local row = Instance.new("Frame")
+            row.ZIndex = 99
+            row.BorderSizePixel = 0
+            row.Size = UDim2.new(1, 0, 0, 58)
+            row.Name = "slider_" .. text
+            row.LayoutOrder = 3
+            row.BackgroundTransparency = 1
+            row.Parent = frame
+            
+            local compName = Instance.new("TextLabel")
+            compName.TextTruncate = Enum.TextTruncate.AtEnd
+            compName.BorderSizePixel = 0
+            compName.TextSize = 13
+            compName.TextXAlignment = Enum.TextXAlignment.Left
+            compName.TextTransparency = 0.3
+            compName.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+            compName.TextColor3 = Color3.fromRGB(155, 148, 134)
+            compName.BackgroundTransparency = 1
+            compName.Size = UDim2.new(0.38, -10, 0, 18)
+            compName.ClipsDescendants = true
+            compName.Text = text
+            compName.Name = "Componentname"
+            compName.Position = UDim2.new(0, 0, 0, 11)
+            compName.Parent = row
+            
+            local right = Instance.new("Frame")
+            right.Active = true
+            right.BorderSizePixel = 0
+            right.AnchorPoint = Vector2.new(1, 0.5)
+            right.Size = UDim2.new(0.62, 0, 0, 16)
+            right.Position = UDim2.new(1, 0, 0.5, 0)
+            right.Name = "right"
+            right.BackgroundTransparency = 1
+            right.Parent = row
+            
+            local sizeConstraint = Instance.new("UISizeConstraint")
+            sizeConstraint.MinSize = Vector2.new(96, 0)
+            sizeConstraint.MaxSize = Vector2.new(200, math.huge)
+            sizeConstraint.Parent = right
+            
+            local rightLayout = Instance.new("UIListLayout")
+            rightLayout.HorizontalFlex = Enum.UIFlexAlignment.Fill
+            rightLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+            rightLayout.SortOrder = Enum.SortOrder.LayoutOrder
+            rightLayout.FillDirection = Enum.FillDirection.Horizontal
+            rightLayout.Parent = right
+            
+            local base = Instance.new("Frame")
+            base.ZIndex = 5
+            base.BorderSizePixel = 0
+            base.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
+            base.Size = UDim2.new(1, -40, 0, 6)
+            base.Name = "Base"
+            base.LayoutOrder = 2
+            base.BackgroundTransparency = 0.95
+            base.Parent = right
+            
+            local baseCorner = Instance.new("UICorner")
+            baseCorner.CornerRadius = UDim.new(1, 0)
+            baseCorner.Parent = base
+            
+            local active = Instance.new("Frame")
+            active.BorderSizePixel = 0
+            active.BackgroundColor3 = Color3.fromRGB(204, 183, 148)
+            active.Size = UDim2.new(0.5, 0, 1, 0)
+            active.Name = "Active"
+            active.Parent = base
+            
+            local activeCorner = Instance.new("UICorner")
+            activeCorner.CornerRadius = UDim.new(1, 0)
+            activeCorner.Parent = active
+            
+            local knob = Instance.new("Frame")
+            knob.BorderSizePixel = 0
+            knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            knob.AnchorPoint = Vector2.new(1, 0.5)
+            knob.Size = UDim2.new(0, 20, 0, 16)
+            knob.Position = UDim2.new(1, 0, 0.5, 0)
+            knob.Name = "Knob"
+            knob.Parent = active
+            
+            local knobCorner = Instance.new("UICorner")
+            knobCorner.Parent = knob
+            
+            local knobShadow = Instance.new("UIShadow")
+            knobShadow.Parent = knob
+            
+            local valueLabel = Instance.new("TextBox")
+            valueLabel.Name = "labeltext"
+            valueLabel.TextXAlignment = Enum.TextXAlignment.Left
+            valueLabel.BorderSizePixel = 0
+            valueLabel.TextTransparency = 0.3
+            valueLabel.TextSize = 13
+            valueLabel.TextColor3 = Color3.fromRGB(155, 148, 134)
+            valueLabel.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+            valueLabel.ClearTextOnFocus = false
+            valueLabel.Size = UDim2.new(0, 30, 1, 0)
+            valueLabel.Text = tostring(default or min)
+            valueLabel.LayoutOrder = 1
+            valueLabel.BackgroundTransparency = 1
+            valueLabel.Parent = right
+            
+            local valConstraint = Instance.new("UISizeConstraint")
+            valConstraint.MinSize = Vector2.new(30, 0)
+            valConstraint.MaxSize = Vector2.new(30, 9999)
+            valConstraint.Parent = valueLabel
+            
+            local hover = Instance.new("Frame")
+            hover.ZIndex = 0
+            hover.BorderSizePixel = 0
+            hover.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
+            hover.Size = UDim2.new(1, 20, 1, 0)
+            hover.Position = UDim2.new(0, -10, 0, 0)
+            hover.Name = "RowHover"
+            hover.BackgroundTransparency = 1
+            hover.Parent = row
+            
+            local hoverCorner = Instance.new("UICorner")
+            hoverCorner.Name = "RowHoverCorner"
+            hoverCorner.CornerRadius = UDim.new(0, 0)
+            hoverCorner.Parent = hover
+            
+            local desc = Instance.new("TextLabel")
+            desc.TextTruncate = Enum.TextTruncate.AtEnd
+            desc.BorderSizePixel = 0
+            desc.TextSize = 11
+            desc.TextXAlignment = Enum.TextXAlignment.Left
+            desc.TextTransparency = 0.3
+            desc.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+            desc.TextColor3 = Color3.fromRGB(155, 148, 134)
+            desc.BackgroundTransparency = 1
+            desc.Size = UDim2.new(0.38, -10, 0, 15)
+            desc.Text = ""
+            desc.Name = "Componentdescription"
+            desc.Position = UDim2.new(0, 0, 0, 29)
+            desc.Parent = row
+            
+            local value = default or min
+            local dragging = false
+            
+            local function updateSlider(input)
+                local pos = math.clamp((input.Position.X - base.AbsolutePosition.X) / base.AbsoluteSize.X, 0, 1)
+                value = math.floor((min + (max - min) * pos) * 100) / 100
+                active.Size = UDim2.new(pos, 0, 1, 0)
+                valueLabel.Text = tostring(value)
+                if callback then callback(value) end
+            end
+            
+            local btn = Instance.new("TextButton")
+            btn.Size = UDim2.new(1, 0, 1, 0)
+            btn.BackgroundTransparency = 1
+            btn.Text = ""
+            btn.Parent = right
+            
+            btn.MouseButton1Down:Connect(function()
+                dragging = true
+            end)
+            
+            UserInputService.InputChanged:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
+                    updateSlider(input)
+                end
+            end)
+            
+            UserInputService.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    dragging = false
+                end
+            end)
+            
+            btn.MouseEnter:Connect(function()
+                hover.BackgroundTransparency = 0.9
+            end)
+            
+            btn.MouseLeave:Connect(function()
+                hover.BackgroundTransparency = 1
+            end)
+            
+            table.insert(tabData.Elements, frame)
+            return frame
+        end
+        
+        function Tab:CreateInput(text, placeholder, callback)
+            local frame = Instance.new("Frame")
+            frame.ZIndex = 99
+            frame.BorderSizePixel = 0
+            frame.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
+            frame.AutomaticSize = Enum.AutomaticSize.Y
+            frame.Size = UDim2.new(1, 0, 0, 0)
+            frame.Name = "input_" .. text
+            frame.BackgroundTransparency = 0.98
+            frame.Parent = PanelContent
+            
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, 12)
+            corner.Parent = frame
+            
+            local layout = Instance.new("UIListLayout")
+            layout.HorizontalFlex = Enum.UIFlexAlignment.Fill
+            layout.SortOrder = Enum.SortOrder.LayoutOrder
+            layout.Parent = frame
+            
+            local padding = Instance.new("UIPadding")
+            padding.PaddingRight = UDim.new(0, 10)
+            padding.PaddingLeft = UDim.new(0, 10)
+            padding.Parent = frame
+            
+            local row = Instance.new("Frame")
+            row.ZIndex = 99
+            row.BorderSizePixel = 0
+            row.Size = UDim2.new(1, 0, 0, 58)
+            row.Name = "input_" .. text
+            row.LayoutOrder = 3
+            row.BackgroundTransparency = 1
+            row.Parent = frame
+            
+            local compName = Instance.new("TextLabel")
+            compName.BorderSizePixel = 0
+            compName.TextSize = 13
+            compName.TextXAlignment = Enum.TextXAlignment.Left
+            compName.TextTransparency = 0.3
+            compName.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+            compName.TextColor3 = Color3.fromRGB(155, 148, 134)
+            compName.BackgroundTransparency = 1
+            compName.Size = UDim2.new(1, -120, 0, 18)
+            compName.Text = text
+            compName.Name = "Componentname"
+            compName.Position = UDim2.new(0, 0, 0, 11)
+            compName.Parent = row
+            
+            local right = Instance.new("Frame")
+            right.BorderSizePixel = 0
+            right.BackgroundColor3 = Color3.fromRGB(8, 8, 7)
+            right.AnchorPoint = Vector2.new(1, 0.5)
+            right.AutomaticSize = Enum.AutomaticSize.X
+            right.Size = UDim2.new(0, 100, 0, 24)
+            right.Position = UDim2.new(1, 0, 0.5, 0)
+            right.Name = "right"
+            right.Parent = row
+            
+            local rightCorner = Instance.new("UICorner")
+            rightCorner.CornerRadius = UDim.new(0, 6)
+            rightCorner.Parent = right
+            
+            local rightShadow = Instance.new("UIShadow")
+            rightShadow.Parent = right
+            
+            local rightLayout = Instance.new("UIListLayout")
+            rightLayout.HorizontalFlex = Enum.UIFlexAlignment.Fill
+            rightLayout.Padding = UDim.new(0, 12)
+            rightLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+            rightLayout.SortOrder = Enum.SortOrder.LayoutOrder
+            rightLayout.FillDirection = Enum.FillDirection.Horizontal
+            rightLayout.Parent = right
+            
+            local rightPadding = Instance.new("UIPadding")
+            rightPadding.PaddingRight = UDim.new(0, 9)
+            rightPadding.PaddingLeft = UDim.new(0, 9)
+            rightPadding.Parent = right
+            
+            local box = Instance.new("TextBox")
+            box.Name = "textfieldinput"
+            box.TextXAlignment = Enum.TextXAlignment.Left
+            box.PlaceholderColor3 = Color3.fromRGB(108, 102, 92)
+            box.BorderSizePixel = 0
+            box.TextSize = 13
+            box.TextColor3 = Color3.fromRGB(155, 148, 134)
+            box.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+            box.AutomaticSize = Enum.AutomaticSize.X
+            box.ClearTextOnFocus = false
+            box.PlaceholderText = placeholder or ""
+            box.Size = UDim2.new(0, 0, 1, 0)
+            box.Text = ""
+            box.BackgroundTransparency = 1
+            box.Parent = right
+            
+            local boxConstraint = Instance.new("UISizeConstraint")
+            boxConstraint.MinSize = Vector2.new(60, 0)
+            boxConstraint.Parent = box
+            
+            local hover = Instance.new("Frame")
+            hover.ZIndex = 0
+            hover.BorderSizePixel = 0
+            hover.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
+            hover.Size = UDim2.new(1, 20, 1, 0)
+            hover.Position = UDim2.new(0, -10, 0, 0)
+            hover.Name = "RowHover"
+            hover.BackgroundTransparency = 1
+            hover.Parent = row
+            
+            local hoverCorner = Instance.new("UICorner")
+            hoverCorner.Name = "RowHoverCorner"
+            hoverCorner.CornerRadius = UDim.new(0, 0)
+            hoverCorner.Parent = hover
+            
+            local desc = Instance.new("TextLabel")
+            desc.TextTruncate = Enum.TextTruncate.AtEnd
+            desc.BorderSizePixel = 0
+            desc.TextSize = 11
+            desc.TextXAlignment = Enum.TextXAlignment.Left
+            desc.TextTransparency = 0.3
+            desc.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+            desc.TextColor3 = Color3.fromRGB(155, 148, 134)
+            desc.BackgroundTransparency = 1
+            desc.Size = UDim2.new(1, -120, 0, 15)
+            desc.Text = ""
+            desc.Name = "Componentdescription"
+            desc.Position = UDim2.new(0, 0, 0, 29)
+            desc.Parent = row
+            
+            box.FocusLost:Connect(function()
+                if callback then callback(box.Text) end
+            end)
+            
+            table.insert(tabData.Elements, frame)
+            return frame
+        end
+        
+        function Tab:CreateLabel(text)
+            local frame = Instance.new("Frame")
+            frame.ZIndex = 100
+            frame.BorderSizePixel = 0
+            frame.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
+            frame.AutomaticSize = Enum.AutomaticSize.Y
+            frame.Size = UDim2.new(1, 0, 0, 0)
+            frame.Name = "label_" .. text
+            frame.BackgroundTransparency = 0.98
+            frame.Parent = PanelContent
+            
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, 12)
+            corner.Parent = frame
+            
+            local layout = Instance.new("UIListLayout")
+            layout.HorizontalFlex = Enum.UIFlexAlignment.Fill
+            layout.SortOrder = Enum.SortOrder.LayoutOrder
+            layout.Parent = frame
+            
+            local padding = Instance.new("UIPadding")
+            padding.PaddingRight = UDim.new(0, 10)
+            padding.PaddingLeft = UDim.new(0, 10)
+            padding.Parent = frame
+            
+            local row = Instance.new("Frame")
+            row.ZIndex = 100
+            row.BorderSizePixel = 0
+            row.Size = UDim2.new(1, 0, 0, 42)
+            row.Name = "label_" .. text
+            row.LayoutOrder = 1
+            row.BackgroundTransparency = 1
+            row.Parent = frame
+            
+            local compName = Instance.new("TextLabel")
+            compName.BorderSizePixel = 0
+            compName.TextSize = 13
+            compName.TextXAlignment = Enum.TextXAlignment.Left
+            compName.TextTransparency = 0.3
+            compName.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+            compName.TextColor3 = Color3.fromRGB(155, 148, 134)
+            compName.BackgroundTransparency = 1
+            compName.AnchorPoint = Vector2.new(0, 0.5)
+            compName.Size = UDim2.new(1, -120, 1, 0)
+            compName.Text = text
+            compName.Name = "Componentname"
+            compName.Position = UDim2.new(0, 0, 0.5, 0)
+            compName.Parent = row
+            
+            local labelText = Instance.new("TextLabel")
+            labelText.BorderSizePixel = 0
+            labelText.TextSize = 13
+            labelText.TextXAlignment = Enum.TextXAlignment.Right
+            labelText.TextTransparency = 0.3
+            labelText.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+            labelText.TextColor3 = Color3.fromRGB(155, 148, 134)
+            labelText.BackgroundTransparency = 1
+            labelText.AnchorPoint = Vector2.new(1, 0.5)
+            labelText.Size = UDim2.new(0, 0, 1, 0)
+            labelText.Text = ""
+            labelText.AutomaticSize = Enum.AutomaticSize.X
+            labelText.Name = "labeltext"
+            labelText.Position = UDim2.new(1, 0, 0.5, 0)
+            labelText.Parent = row
+            
+            table.insert(tabData.Elements, frame)
+            return frame
+        end
+        
+        function Tab:CreateDropdown(text, options, default, callback)
+            local frame = Instance.new("Frame")
+            frame.ZIndex = 99
+            frame.BorderSizePixel = 0
+            frame.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
+            frame.AutomaticSize = Enum.AutomaticSize.Y
+            frame.Size = UDim2.new(1, 0, 0, 0)
+            frame.Name = "dropdown_" .. text
+            frame.BackgroundTransparency = 0.98
+            frame.Parent = PanelContent
+            
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, 12)
+            corner.Parent = frame
+            
+            local layout = Instance.new("UIListLayout")
+            layout.HorizontalFlex = Enum.UIFlexAlignment.Fill
+            layout.SortOrder = Enum.SortOrder.LayoutOrder
+            layout.Parent = frame
+            
+            local padding = Instance.new("UIPadding")
+            padding.PaddingRight = UDim.new(0, 10)
+            padding.PaddingLeft = UDim.new(0, 10)
+            padding.Parent = frame
+            
+            local row = Instance.new("Frame")
+            row.ZIndex = 99
+            row.BorderSizePixel = 0
+            row.Size = UDim2.new(1, 0, 0, 58)
+            row.Name = "dropdown_" .. text
+            row.LayoutOrder = 3
+            row.BackgroundTransparency = 1
+            row.Parent = frame
+            
+            local compName = Instance.new("TextLabel")
+            compName.BorderSizePixel = 0
+            compName.TextSize = 13
+            compName.TextXAlignment = Enum.TextXAlignment.Left
+            compName.TextTransparency = 0.3
+            compName.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+            compName.TextColor3 = Color3.fromRGB(155, 148, 134)
+            compName.BackgroundTransparency = 1
+            compName.Size = UDim2.new(1, -120, 0, 18)
+            compName.Text = text
+            compName.Name = "Componentname"
+            compName.Position = UDim2.new(0, 0, 0, 11)
+            compName.Parent = row
+            
+            local right = Instance.new("TextButton")
+            right.BorderSizePixel = 0
+            right.AutoButtonColor = false
+            right.BackgroundColor3 = Color3.fromRGB(8, 8, 7)
+            right.AnchorPoint = Vector2.new(1, 0.5)
+            right.BackgroundTransparency = 0.45
+            right.Size = UDim2.new(0, 120, 0, 26)
+            right.Text = ""
+            right.Name = "right"
+            right.Position = UDim2.new(1, 0, 0.5, 0)
+            right.Parent = row
+            
+            local rightCorner = Instance.new("UICorner")
+            rightCorner.CornerRadius = UDim.new(0, 10)
+            rightCorner.Parent = right
+            
+            local rightStroke = Instance.new("UIStroke")
+            rightStroke.Color = Color3.fromRGB(37, 34, 30)
+            rightStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+            rightStroke.Parent = right
+            
+            local rightPadding = Instance.new("UIPadding")
+            rightPadding.PaddingRight = UDim.new(0, 2)
+            rightPadding.PaddingLeft = UDim.new(0, 9)
+            rightPadding.Parent = right
+            
+            local valueLabel = Instance.new("TextLabel")
+            valueLabel.TextTruncate = Enum.TextTruncate.AtEnd
+            valueLabel.BorderSizePixel = 0
+            valueLabel.TextSize = 12
+            valueLabel.TextXAlignment = Enum.TextXAlignment.Left
+            valueLabel.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+            valueLabel.TextColor3 = Color3.fromRGB(155, 148, 134)
+            valueLabel.BackgroundTransparency = 1
+            valueLabel.AnchorPoint = Vector2.new(0, 0.5)
+            valueLabel.Size = UDim2.new(1, -32, 1, 0)
+            valueLabel.Text = default or options[1] or ""
+            valueLabel.Name = "combo_box_value"
+            valueLabel.Position = UDim2.new(0, 0, 0.5, 0)
+            valueLabel.Parent = right
+            
+            local arrowBox = Instance.new("Frame")
+            arrowBox.BorderSizePixel = 0
+            arrowBox.AnchorPoint = Vector2.new(1, 0.5)
+            arrowBox.Size = UDim2.new(0, 24, 0, 20)
+            arrowBox.Position = UDim2.new(1, 0, 0.5, 0)
+            arrowBox.Name = "smallarrowbox"
+            arrowBox.BackgroundTransparency = 1
+            arrowBox.Parent = right
+            
+            local arrowIcon = Instance.new("ImageLabel")
+            arrowIcon.BorderSizePixel = 0
+            arrowIcon.ImageColor3 = Color3.fromRGB(155, 148, 134)
+            arrowIcon.AnchorPoint = Vector2.new(0.5, 0.5)
+            arrowIcon.Image = "rbxassetid://138715549597115"
+            arrowIcon.Size = UDim2.new(0, 8, 0, 5)
+            arrowIcon.BackgroundTransparency = 1
+            arrowIcon.Name = "arrowicon"
+            arrowIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
+            arrowIcon.Parent = arrowBox
+            
+            local hover = Instance.new("Frame")
+            hover.ZIndex = 0
+            hover.BorderSizePixel = 0
+            hover.BackgroundColor3 = Color3.fromRGB(243, 235, 218)
+            hover.Size = UDim2.new(1, 20, 1, 0)
+            hover.Position = UDim2.new(0, -10, 0, 0)
+            hover.Name = "RowHover"
+            hover.BackgroundTransparency = 1
+            hover.Parent = row
+            
+            local hoverCorner = Instance.new("UICorner")
+            hoverCorner.Name = "RowHoverCorner"
+            hoverCorner.CornerRadius = UDim.new(0, 0)
+            hoverCorner.Parent = hover
+            
+            local desc = Instance.new("TextLabel")
+            desc.TextTruncate = Enum.TextTruncate.AtEnd
+            desc.BorderSizePixel = 0
+            desc.TextSize = 11
+            desc.TextXAlignment = Enum.TextXAlignment.Left
+            desc.TextTransparency = 0.3
+            desc.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+            desc.TextColor3 = Color3.fromRGB(155, 148, 134)
+            desc.BackgroundTransparency = 1
+            desc.Size = UDim2.new(1, -120, 0, 15)
+            desc.Text = ""
+            desc.Name = "Componentdescription"
+            desc.Position = UDim2.new(0, 0, 0, 29)
+            desc.Parent = row
+            
+            local open = false
+            local list = nil
+            
+            right.MouseButton1Click:Connect(function()
+                if open then
+                    if list then list:Destroy() end
+                    open = false
+                    return
+                end
+                
+                open = true
+                list = Instance.new("Frame")
+                list.Visible = true
+                list.ZIndex = 100
+                list.BorderSizePixel = 0
+                list.BackgroundColor3 = Color3.fromRGB(8, 8, 7)
+                list.AnchorPoint = Vector2.new(1, 0)
+                list.ClipsDescendants = true
+                list.Size = UDim2.new(0, 120, 0, 0)
+                list.Position = UDim2.new(1, 0, 0, 45)
+                list.Name = "DropdownList"
+                list.Parent = row
+                
+                local listScale = Instance.new("UIScale")
+                listScale.Parent = list
+                
+                local listCorner = Instance.new("UICorner")
+                listCorner.CornerRadius = UDim.new(0, 6)
+                listCorner.Parent = list
+                
+                local listShadow = Instance.new("UIShadow")
+                listShadow.Parent = list
+                
+                local listConstraint = Instance.new("UISizeConstraint")
+                listConstraint.MinSize = Vector2.new(120, 0)
+                listConstraint.MaxSize = Vector2.new(300, 150)
+                listConstraint.Parent = list
+                
+                local holder = Instance.new("ScrollingFrame")
+                holder.ZIndex = 100
+                holder.BorderSizePixel = 0
+                holder.CanvasSize = UDim2.new(0, 0, 0, #options * 28 + 16)
+                holder.Name = "OptionHolder"
+                holder.ScrollBarImageTransparency = 0.45
+                holder.Size = UDim2.new(1, 0, 0, #options * 28 + 16)
+                holder.ScrollBarImageColor3 = Color3.fromRGB(155, 148, 134)
+                holder.ScrollBarThickness = 2
+                holder.BackgroundTransparency = 1
+                holder.Parent = list
+                
+                local holderCorner = Instance.new("UICorner")
+                holderCorner.CornerRadius = UDim.new(0, 6)
+                holderCorner.Parent = holder
+                
+                local holderLayout = Instance.new("UIListLayout")
+                holderLayout.HorizontalFlex = Enum.UIFlexAlignment.Fill
+                holderLayout.Padding = UDim.new(0, 3)
+                holderLayout.SortOrder = Enum.SortOrder.LayoutOrder
+                holderLayout.Parent = holder
+                
+                local holderPadding = Instance.new("UIPadding")
+                holderPadding.PaddingTop = UDim.new(0, 8)
+                holderPadding.PaddingRight = UDim.new(0, 8)
+                holderPadding.PaddingLeft = UDim.new(0, 8)
+                holderPadding.PaddingBottom = UDim.new(0, 8)
+                holderPadding.Parent = holder
+                
+                for i, option in pairs(options) do
+                    local opt = Instance.new("TextButton")
+                    opt.BorderSizePixel = 0
+                    opt.TextXAlignment = Enum.TextXAlignment.Left
+                    opt.TextSize = 13
+                    opt.AutoButtonColor = false
+                    opt.TextColor3 = Color3.fromRGB(244, 242, 237)
+                    opt.BackgroundColor3 = Color3.fromRGB(204, 183, 148)
+                    opt.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+                    opt.ZIndex = 101
+                    opt.BackgroundTransparency = 0.8
+                    opt.Size = UDim2.new(1, 0, 0, 28)
+                    opt.Text = option
+                    opt.Name = "option_" .. option
+                    opt.Parent = holder
+                    
+                    local optCorner = Instance.new("UICorner")
+                    optCorner.CornerRadius = UDim.new(0, 4)
+                    optCorner.Parent = opt
+                    
+                    local optPadding = Instance.new("UIPadding")
+                    optPadding.PaddingRight = UDim.new(0, 8)
+                    optPadding.PaddingLeft = UDim.new(0, 14)
+                    optPadding.PaddingBottom = UDim.new(0, 1)
+                    optPadding.Parent = opt
+                    
+                    if option == valueLabel.Text then
+                        local dot = Instance.new("Frame")
+                        dot.ZIndex = 102
+                        dot.BorderSizePixel = 0
+                        dot.BackgroundColor3 = Color3.fromRGB(204, 183, 148)
+                        dot.AnchorPoint = Vector2.new(0.5, 0.5)
+                        dot.Size = UDim2.new(0, 6, 0, 6)
+                        dot.Position = UDim2.new(0, -8, 0.5, 0)
+                        dot.Name = "selecteddot"
+                        dot.Parent = opt
+                        
+                        local dotCorner = Instance.new("UICorner")
+                        dotCorner.CornerRadius = UDim.new(1, 0)
+                        dotCorner.Parent = dot
+                    end
+                    
+                    opt.MouseButton1Click:Connect(function()
+                        valueLabel.Text = option
+                        if callback then callback(option) end
+                        list:Destroy()
+                        open = false
+                    end)
+                end
+                
+                list.Size = UDim2.new(0, 120, 0, #options * 28 + 32)
+                holder.Size = UDim2.new(1, 0, 0, #options * 28 + 16)
+            end)
+            
+            table.insert(tabData.Elements, frame)
+            return frame
+        end
+        
+        function Window:Notify(config)
+            config = config or {}
+            
+            local notif = Instance.new("Frame")
+            notif.Size = UDim2.new(0, 300, 0, 50)
+            notif.Position = UDim2.new(1, -320, 0, 10)
+            notif.BackgroundColor3 = Color3.fromRGB(25, 25, 32)
+            notif.BorderSizePixel = 0
+            notif.Parent = ScreenGui
+            
+            local ncorner = Instance.new("UICorner")
+            ncorner.CornerRadius = UDim.new(0, 6)
+            ncorner.Parent = notif
+            
+            local title = Instance.new("TextLabel")
+            title.Size = UDim2.new(1, -20, 0.5, 0)
+            title.Position = UDim2.new(0, 10, 0, 4)
+            title.BackgroundTransparency = 1
+            title.Text = config.Title or "Notification"
+            title.TextColor3 = Color3.fromRGB(220, 220, 230)
+            title.TextSize = 14
+            title.Font = Enum.Font.GothamBold
+            title.Parent = notif
+            
+            local desc = Instance.new("TextLabel")
+            desc.Size = UDim2.new(1, -20, 0.5, 0)
+            desc.Position = UDim2.new(0, 10, 0.5, 0)
+            desc.BackgroundTransparency = 1
+            desc.Text = config.Description or ""
+            desc.TextColor3 = Color3.fromRGB(160, 160, 170)
+            desc.TextSize = 12
+            desc.Font = Enum.Font.Gotham
+            desc.Parent = notif
+            
+            game:GetService("Debris"):AddItem(notif, 3)
+            
+            TweenService:Create(notif, TweenInfo.new(0.3), {Position = UDim2.new(1, -320, 0, 10)}):Play()
+            task.wait(2.8)
+            TweenService:Create(notif, TweenInfo.new(0.3), {Position = UDim2.new(1, 0, 0, 10)}):Play()
+            task.wait(0.3)
+            notif:Destroy()
+        end
+        
+        function Window:Destroy()
+            MainFrame:Destroy()
+        end
+        
+        return Tab
+    end
+    
+    return Window
+end
+
+return Sable
