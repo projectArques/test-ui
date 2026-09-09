@@ -235,7 +235,8 @@ local function SwitchTab(tabData)
     PanelContent.CanvasSize = UDim2.new(0, 0, 0, ContentLayout.AbsoluteContentSize.Y + 20)
     
     Panel.Visible = true
-    Panel:TweenSize(UDim2.new(0, 300, 0, math.min(400, ContentLayout.AbsoluteContentSize.Y + 40)), "Out", "Quad", 0.3, true)
+    local height = math.min(400, ContentLayout.AbsoluteContentSize.Y + 40)
+    Panel:TweenSize(UDim2.new(0, 300, 0, height), "Out", "Quad", 0.3, true)
 end
 
 function Sable:CreateWindow(config)
@@ -257,7 +258,11 @@ function Sable:CreateWindow(config)
         if input.KeyCode == keybind then
             UIVisible = not UIVisible
             MainFrame.Visible = UIVisible
-            if not UIVisible then
+            if UIVisible and CurrentTab then
+                Panel.Visible = true
+                local height = math.min(400, ContentLayout.AbsoluteContentSize.Y + 40)
+                Panel:TweenSize(UDim2.new(0, 300, 0, height), "Out", "Quad", 0.3, true)
+            else
                 Panel.Visible = false
             end
         end
@@ -266,7 +271,11 @@ function Sable:CreateWindow(config)
     Chevron.MouseButton1Click:Connect(function()
         UIVisible = not UIVisible
         MainFrame.Visible = UIVisible
-        if not UIVisible then
+        if UIVisible and CurrentTab then
+            Panel.Visible = true
+            local height = math.min(400, ContentLayout.AbsoluteContentSize.Y + 40)
+            Panel:TweenSize(UDim2.new(0, 300, 0, height), "Out", "Quad", 0.3, true)
+        else
             Panel.Visible = false
         end
     end)
