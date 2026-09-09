@@ -7,7 +7,6 @@ local CoreGui = game:GetService("CoreGui")
 
 local TabsData = {}
 local CurrentTab = nil
-local TabButtons = {}
 local PanelOpen = false
 
 local ScreenGui = Instance.new("ScreenGui")
@@ -53,7 +52,7 @@ Brand.Name = "Brand"
 Brand.ZIndex = 150
 Brand.TextSize = 26
 Brand.TextXAlignment = Enum.TextXAlignment.Left
-Brand.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+Brand.Font = Enum.Font.GothamBold
 Brand.TextColor3 = Color3.fromRGB(255, 255, 255)
 Brand.BackgroundTransparency = 1
 Brand.AnchorPoint = Vector2.new(0, 0.5)
@@ -96,6 +95,7 @@ PanelContent.AnchorPoint = Vector2.new(0.5, 0)
 PanelContent.Size = UDim2.new(1, -20, 1, -20)
 PanelContent.Position = UDim2.new(0.5, 0, 0, 10)
 PanelContent.ScrollBarThickness = 3
+PanelContent.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 110)
 PanelContent.BackgroundTransparency = 1
 PanelContent.Parent = Panel
 
@@ -141,7 +141,7 @@ KeyHintKey.Name = "Key"
 KeyHintKey.ZIndex = 152
 KeyHintKey.BorderSizePixel = 0
 KeyHintKey.TextSize = 11
-KeyHintKey.FontFace = Font.new("rbxasset://fonts/families/Inconsolata.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+KeyHintKey.Font = Enum.Font.SourceSans
 KeyHintKey.TextColor3 = Color3.fromRGB(204, 183, 148)
 KeyHintKey.BackgroundTransparency = 1
 KeyHintKey.Size = UDim2.new(1, 0, 1, 0)
@@ -155,7 +155,7 @@ KeyHintCaption.ZIndex = 151
 KeyHintCaption.BorderSizePixel = 0
 KeyHintCaption.TextSize = 12
 KeyHintCaption.TextXAlignment = Enum.TextXAlignment.Left
-KeyHintCaption.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+KeyHintCaption.Font = Enum.Font.GothamMedium
 KeyHintCaption.TextColor3 = Color3.fromRGB(155, 148, 134)
 KeyHintCaption.BackgroundTransparency = 1
 KeyHintCaption.AnchorPoint = Vector2.new(0, 0.5)
@@ -192,15 +192,8 @@ local function SwitchTab(tabData)
     end
     
     CurrentTab = tabData
-    task.wait(0.1)
+    task.wait()
     PanelContent.CanvasSize = UDim2.new(0, 0, 0, ContentLayout.AbsoluteContentSize.Y + 20)
-    
-    if not PanelOpen then
-        PanelOpen = true
-        Panel.Visible = true
-        local height = math.min(350, ContentLayout.AbsoluteContentSize.Y + 40)
-        Panel:TweenSize(UDim2.new(0, 300, 0, height), "Out", "Quad", 0.3, true)
-    end
 end
 
 function Sable:CreateWindow(config)
@@ -219,10 +212,11 @@ function Sable:CreateWindow(config)
     
     local function ToggleUI()
         PanelOpen = not PanelOpen
-        MainFrame.Visible = true
         if PanelOpen then
             Panel.Visible = true
+            task.wait()
             local height = math.min(350, ContentLayout.AbsoluteContentSize.Y + 40)
+            if height < 50 then height = 100 end
             Panel:TweenSize(UDim2.new(0, 300, 0, height), "Out", "Quad", 0.3, true)
             Chevron.Rotation = 0
         else
@@ -243,15 +237,12 @@ function Sable:CreateWindow(config)
     Chevron.MouseButton1Click:Connect(ToggleUI)
     
     local Window = {}
-    local TabIndex = 0
     
     function Window:CreateTab(name, icon)
-        TabIndex = TabIndex + 1
         local tabData = {
             Name = name,
             Icon = icon or "rbxassetid://0",
-            Elements = {},
-            Index = TabIndex
+            Elements = {}
         }
         
         local frame = Instance.new("Frame")
@@ -285,7 +276,7 @@ function Sable:CreateWindow(config)
         label.TextTruncate = Enum.TextTruncate.AtEnd
         label.ZIndex = 151
         label.TextSize = 14
-        label.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+        label.Font = Enum.Font.GothamBold
         label.TextColor3 = Color3.fromRGB(241, 241, 241)
         label.BackgroundTransparency = 1
         label.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -307,14 +298,15 @@ function Sable:CreateWindow(config)
         interact.Parent = frame
         
         table.insert(TabsData, tabData)
-        table.insert(TabButtons, frame)
         
         interact.MouseButton1Click:Connect(function()
             SwitchTab(tabData)
             if not PanelOpen then
                 PanelOpen = true
                 Panel.Visible = true
+                task.wait()
                 local height = math.min(350, ContentLayout.AbsoluteContentSize.Y + 40)
+                if height < 50 then height = 100 end
                 Panel:TweenSize(UDim2.new(0, 300, 0, height), "Out", "Quad", 0.3, true)
                 Chevron.Rotation = 0
             end
@@ -322,10 +314,11 @@ function Sable:CreateWindow(config)
         
         if #TabsData == 1 then
             SwitchTab(tabData)
-            task.wait(0.2)
+            task.wait()
             PanelOpen = true
             Panel.Visible = true
             local height = math.min(350, ContentLayout.AbsoluteContentSize.Y + 40)
+            if height < 50 then height = 100 end
             Panel:TweenSize(UDim2.new(0, 300, 0, height), "Out", "Quad", 0.3, true)
             Chevron.Rotation = 0
         end
@@ -362,7 +355,7 @@ function Sable:CreateWindow(config)
             compName.BorderSizePixel = 0
             compName.TextSize = 13
             compName.TextXAlignment = Enum.TextXAlignment.Left
-            compName.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+            compName.Font = Enum.Font.GothamMedium
             compName.TextColor3 = Color3.fromRGB(220, 220, 230)
             compName.BackgroundTransparency = 1
             compName.AnchorPoint = Vector2.new(0, 0.5)
@@ -383,6 +376,9 @@ function Sable:CreateWindow(config)
             end)
             
             table.insert(tabData.Elements, frame)
+            if CurrentTab == tabData then
+                SwitchTab(tabData)
+            end
             return frame
         end
         
@@ -419,7 +415,7 @@ function Sable:CreateWindow(config)
             compName.BorderSizePixel = 0
             compName.TextSize = 13
             compName.TextXAlignment = Enum.TextXAlignment.Left
-            compName.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+            compName.Font = Enum.Font.GothamMedium
             compName.TextColor3 = Color3.fromRGB(220, 220, 230)
             compName.BackgroundTransparency = 1
             compName.Size = UDim2.new(1, -60, 1, 0)
@@ -484,6 +480,9 @@ function Sable:CreateWindow(config)
             end)
             
             table.insert(tabData.Elements, frame)
+            if CurrentTab == tabData then
+                SwitchTab(tabData)
+            end
             return frame
         end
         
@@ -520,7 +519,7 @@ function Sable:CreateWindow(config)
             compName.BorderSizePixel = 0
             compName.TextSize = 13
             compName.TextXAlignment = Enum.TextXAlignment.Left
-            compName.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+            compName.Font = Enum.Font.GothamMedium
             compName.TextColor3 = Color3.fromRGB(220, 220, 230)
             compName.BackgroundTransparency = 1
             compName.Size = UDim2.new(0.6, -10, 0.5, 0)
@@ -534,7 +533,7 @@ function Sable:CreateWindow(config)
             valueLabel.BorderSizePixel = 0
             valueLabel.TextSize = 13
             valueLabel.TextXAlignment = Enum.TextXAlignment.Right
-            valueLabel.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+            valueLabel.Font = Enum.Font.GothamMedium
             valueLabel.TextColor3 = Color3.fromRGB(150, 150, 255)
             valueLabel.BackgroundTransparency = 1
             valueLabel.Size = UDim2.new(0.4, -10, 0.5, 0)
@@ -614,6 +613,9 @@ function Sable:CreateWindow(config)
             end)
             
             table.insert(tabData.Elements, frame)
+            if CurrentTab == tabData then
+                SwitchTab(tabData)
+            end
             return frame
         end
         
@@ -649,7 +651,7 @@ function Sable:CreateWindow(config)
             compName.BorderSizePixel = 0
             compName.TextSize = 13
             compName.TextXAlignment = Enum.TextXAlignment.Left
-            compName.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+            compName.Font = Enum.Font.GothamMedium
             compName.TextColor3 = Color3.fromRGB(220, 220, 230)
             compName.BackgroundTransparency = 1
             compName.Size = UDim2.new(0.35, -5, 1, 0)
@@ -662,7 +664,7 @@ function Sable:CreateWindow(config)
             box.TextSize = 13
             box.TextXAlignment = Enum.TextXAlignment.Left
             box.TextColor3 = Color3.fromRGB(220, 220, 230)
-            box.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+            box.Font = Enum.Font.GothamMedium
             box.BackgroundColor3 = Color3.fromRGB(40, 40, 48)
             box.ClearTextOnFocus = false
             box.PlaceholderText = placeholder or ""
@@ -682,6 +684,9 @@ function Sable:CreateWindow(config)
             end)
             
             table.insert(tabData.Elements, frame)
+            if CurrentTab == tabData then
+                SwitchTab(tabData)
+            end
             return frame
         end
         
@@ -707,7 +712,7 @@ function Sable:CreateWindow(config)
             compName.BorderSizePixel = 0
             compName.TextSize = 12
             compName.TextXAlignment = Enum.TextXAlignment.Left
-            compName.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+            compName.Font = Enum.Font.GothamMedium
             compName.TextColor3 = Color3.fromRGB(150, 150, 160)
             compName.BackgroundTransparency = 1
             compName.AnchorPoint = Vector2.new(0, 0.5)
@@ -718,6 +723,9 @@ function Sable:CreateWindow(config)
             compName.Parent = row
             
             table.insert(tabData.Elements, frame)
+            if CurrentTab == tabData then
+                SwitchTab(tabData)
+            end
             return frame
         end
         
@@ -753,7 +761,7 @@ function Sable:CreateWindow(config)
             compName.BorderSizePixel = 0
             compName.TextSize = 13
             compName.TextXAlignment = Enum.TextXAlignment.Left
-            compName.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+            compName.Font = Enum.Font.GothamMedium
             compName.TextColor3 = Color3.fromRGB(220, 220, 230)
             compName.BackgroundTransparency = 1
             compName.Size = UDim2.new(0.35, -5, 1, 0)
@@ -767,7 +775,7 @@ function Sable:CreateWindow(config)
             dropdownBtn.TextXAlignment = Enum.TextXAlignment.Left
             dropdownBtn.AutoButtonColor = false
             dropdownBtn.TextColor3 = Color3.fromRGB(220, 220, 230)
-            dropdownBtn.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+            dropdownBtn.Font = Enum.Font.GothamMedium
             dropdownBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 48)
             dropdownBtn.Size = UDim2.new(0.65, -5, 1, -10)
             dropdownBtn.Position = UDim2.new(0.35, 0, 0, 5)
@@ -827,7 +835,7 @@ function Sable:CreateWindow(config)
                     opt.TextXAlignment = Enum.TextXAlignment.Left
                     opt.AutoButtonColor = false
                     opt.TextColor3 = Color3.fromRGB(220, 220, 230)
-                    opt.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+                    opt.Font = Enum.Font.GothamMedium
                     opt.BackgroundColor3 = Color3.fromRGB(45, 45, 52)
                     opt.Size = UDim2.new(1, -10, 0, 28)
                     opt.Position = UDim2.new(0, 5, 0, 0)
@@ -864,6 +872,9 @@ function Sable:CreateWindow(config)
             end)
             
             table.insert(tabData.Elements, frame)
+            if CurrentTab == tabData then
+                SwitchTab(tabData)
+            end
             return frame
         end
         
