@@ -66,16 +66,26 @@ CloseBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 CloseBtn.BorderSizePixel = 0
 CloseBtn.Text = "✕"
 CloseBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-CloseBtn.TextSize = 16
+CloseBtn.TextSize = 14
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.Parent = TopBar
 
 local CloseCorner = Instance.new("UICorner")
-CloseCorner.CornerRadius = UDim.new(0, 4)
+CloseCorner.CornerRadius = UDim.new(1, 0)
 CloseCorner.Parent = CloseBtn
 
 CloseBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = false
+end)
+
+CloseBtn.MouseEnter:Connect(function()
+    CloseBtn.BackgroundColor3 = Color3.fromRGB(60, 30, 30)
+    CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+end)
+
+CloseBtn.MouseLeave:Connect(function()
+    CloseBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    CloseBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 end)
 
 local MinBtn = Instance.new("TextButton")
@@ -85,16 +95,26 @@ MinBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 MinBtn.BorderSizePixel = 0
 MinBtn.Text = "−"
 MinBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-MinBtn.TextSize = 20
+MinBtn.TextSize = 18
 MinBtn.Font = Enum.Font.GothamBold
 MinBtn.Parent = TopBar
 
 local MinCorner = Instance.new("UICorner")
-MinCorner.CornerRadius = UDim.new(0, 4)
+MinCorner.CornerRadius = UDim.new(1, 0)
 MinCorner.Parent = MinBtn
 
 MinBtn.MouseButton1Click:Connect(function()
     MainFrame.Visible = not MainFrame.Visible
+end)
+
+MinBtn.MouseEnter:Connect(function()
+    MinBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    MinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+end)
+
+MinBtn.MouseLeave:Connect(function()
+    MinBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    MinBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
 end)
 
 local Dragging = false
@@ -260,15 +280,30 @@ function Sable:CreateWindow(config)
                 if b.Indicator then
                     b.Indicator.Visible = false
                 end
+                b.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
             end
             indicator.Visible = true
+            btn.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
             SwitchTab(tabData)
+        end)
+        
+        btn.MouseEnter:Connect(function()
+            if not indicator.Visible then
+                btn.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+            end
+        end)
+        
+        btn.MouseLeave:Connect(function()
+            if not indicator.Visible then
+                btn.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+            end
         end)
         
         table.insert(TabsData, tabData)
         
         if #TabsData == 1 then
             indicator.Visible = true
+            btn.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
             SwitchTab(tabData)
         end
         
